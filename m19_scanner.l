@@ -1,5 +1,5 @@
 %option c++ prefix="m19_scanner_" outfile="m19_scanner.cpp"
-%option stack noyywrap yylineno 8bit
+%option stack noyywrap yylineno 8bit debug
 %{ 
 // make relevant includes before including the parser's tab file
 #include <string>
@@ -13,8 +13,9 @@
 %}
 %x X_STRING
 %%
+					   { set_debug(1); }
 
-"--".*                 ; /* ignore comments */
+"--".*             	   ; /* ignore comments */
 
 ">="                   return tGE; 
 "<="                   return tLE; 
