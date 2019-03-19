@@ -23,8 +23,7 @@
 %token <s> tIDENTIFIER tSTRING
 %token tFOR tIF tPRINT tREAD tBEGIN tEND
 
-%nonassoc tIFX
-%nonassoc tELSE
+%nonassoc tIFEX
 
 %right '='
 %left tGE tLE tEQ tNE '>' '<'
@@ -52,9 +51,10 @@ list : stmt	     { $$ = new cdk::sequence_node(LINE, $1); }
 stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE, $1); }
  	   | tPRINT expr ';'                      { $$ = new m19::print_node(LINE, $2); }
      | tREAD lval ';'                       { $$ = new m19::read_node(LINE, $2); }
+     | '[' expr ']' '#' stmt                { $$ = new m19::if_node(LINE, $2, $5); }
+     | '[' expr ']' '?' stmt %prec tIFEX    { $$ = new m19::if_node(LINE, $2, $5); }
+     | '[' expr ']' '?' stmt ':' stmt       { $$ = new m19::if_else_node(LINE, $2, $5, $7); }
      | '[' expr ';' expr ';' expr ']' stmt  { $$ = new m19::for_node(LINE, $2, $4, $6, $8); }
-     | tIF '(' expr ')' stmt %prec tIFX     { $$ = new m19::if_node(LINE, $3, $5); }
-     | tIF '(' expr ')' stmt tELSE stmt     { $$ = new m19::if_else_node(LINE, $3, $5, $7); }
      | '{' list '}'                         { $$ = $2; }
      ;
 
