@@ -21,7 +21,6 @@
 "=="                   return tEQ; 
 "!="                   return tNE; 
 
-"while"                return tWHILE; 
 "if"                   return tIF; 
 "else"                 return tELSE; 
 "print"                return tPRINT; 
@@ -39,7 +38,7 @@
 
 [0-9]+                 yylval.i = strtol(yytext, nullptr, 10); return tINTEGER;
 
-[-()<>=+*/%;{}.]       return *yytext;
+[\[\]-()<>=+*/%;{}.]       return *yytext;
 
 [ \t\n]+               ; /* ignore whitespace */
 

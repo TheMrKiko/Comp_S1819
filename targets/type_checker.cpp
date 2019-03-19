@@ -180,8 +180,8 @@ void m19::type_checker::do_read_node(m19::read_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void m19::type_checker::do_while_node(m19::while_node * const node, int lvl) {
-  node->condition()->accept(this, lvl + 4);
+void m19::type_checker::do_for_node(m19::for_node * const node, int lvl) {
+  /*node->condition()->accept(this, lvl + 4);*/
 }
 
 //---------------------------------------------------------------------------

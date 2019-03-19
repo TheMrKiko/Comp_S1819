@@ -235,15 +235,15 @@ void m19::postfix_writer::do_read_node(m19::read_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_while_node(m19::while_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
+void m19::postfix_writer::do_for_node(m19::for_node * const node, int lvl) {
+  /*ASSERT_SAFE_EXPRESSIONS;
   int lbl1, lbl2;
   _pf.LABEL(mklbl(lbl1 = ++_lbl));
   node->condition()->accept(this, lvl);
   _pf.JZ(mklbl(lbl2 = ++_lbl));
   node->block()->accept(this, lvl + 2);
   _pf.JMP(mklbl(lbl1));
-  _pf.LABEL(mklbl(lbl2));
+  _pf.LABEL(mklbl(lbl2));*/
 }
 
 //---------------------------------------------------------------------------

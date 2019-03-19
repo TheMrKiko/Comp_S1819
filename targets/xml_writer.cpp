@@ -160,8 +160,8 @@ void m19::xml_writer::do_read_node(m19::read_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void m19::xml_writer::do_while_node(m19::while_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
+void m19::xml_writer::do_for_node(m19::for_node * const node, int lvl) {
+  /*ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   openTag("condition", lvl + 2);
   node->condition()->accept(this, lvl + 4);
@@ -169,7 +169,7 @@ void m19::xml_writer::do_while_node(m19::while_node * const node, int lvl) {
   openTag("block", lvl + 2);
   node->block()->accept(this, lvl + 4);
   closeTag("block", lvl + 2);
-  closeTag(node, lvl);
+  closeTag(node, lvl);*/
 }
 
 //---------------------------------------------------------------------------
