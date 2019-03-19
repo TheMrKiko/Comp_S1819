@@ -5,6 +5,7 @@
 #include <string>
 #include <cdk/ast/sequence_node.h>
 #include <cdk/ast/expression_node.h>
+#include "ast/expressions_node.h"
 #include <cdk/ast/lvalue_node.h>
 #include "m19_parser.tab.h"
 
@@ -37,7 +38,7 @@
 
 [0-9]+                 yylval.i = strtol(yytext, nullptr, 10); return tINTEGER;
 
-[-[\]()<>=+*/%;{}#?:.]   return *yytext;
+[-[\]()<>=+*/%;{}#?:.,]   return *yytext;
 
 [ \t\n]+               ; /* ignore whitespace */
 

@@ -11,17 +11,18 @@
 %}
 
 %union {
-  int                   i;	/* integer value */
-  std::string          *s;	/* symbol name or string literal */
-  cdk::basic_node      *node;	/* node pointer */
-  cdk::sequence_node   *sequence;
-  cdk::expression_node *expression; /* expression nodes */
-  cdk::lvalue_node     *lvalue;
+  int                    i;	/* integer value */
+  std::string           *s;	/* symbol name or string literal */
+  cdk::basic_node       *node;	/* node pointer */
+  cdk::sequence_node    *sequence;
+  cdk::expression_node  *expression; /* expression nodes */
+  cdk::lvalue_node      *lvalue;
+  m19::expressions_node *expressions;
 };
 
 %token <i> tINTEGER
 %token <s> tIDENTIFIER tSTRING
-%token tFOR tIF tPRINT tREAD tBEGIN tEND
+%token tIF tPRINT tREAD tBEGIN tEND
 
 %nonassoc tIFEX
 
@@ -35,6 +36,7 @@
 %type <sequence> list
 %type <expression> expr
 %type <lvalue> lval
+%type <expressions> exps
 
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
@@ -48,13 +50,14 @@ list : stmt	     { $$ = new cdk::sequence_node(LINE, $1); }
 	   | list stmt { $$ = new cdk::sequence_node(LINE, $2, $1); }
 	   ;
 
+
 stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE, $1); }
  	   | tPRINT expr ';'                      { $$ = new m19::print_node(LINE, $2); }
      | tREAD lval ';'                       { $$ = new m19::read_node(LINE, $2); }
      | '[' expr ']' '#' stmt                { $$ = new m19::if_node(LINE, $2, $5); }
      | '[' expr ']' '?' stmt %prec tIFEX    { $$ = new m19::if_node(LINE, $2, $5); }
      | '[' expr ']' '?' stmt ':' stmt       { $$ = new m19::if_else_node(LINE, $2, $5, $7); }
-     | '[' expr ';' expr ';' expr ']' stmt  { $$ = new m19::for_node(LINE, $2, $4, $6, $8); }
+     | '[' exps ';' exps ';' exps ']' stmt  { $$ = new m19::for_node(LINE, $2, $4, $6, $8); }
      | '{' list '}'                         { $$ = $2; }
      ;
 
@@ -76,6 +79,10 @@ expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); }
      | lval                    { $$ = new cdk::rvalue_node(LINE, $1); }  //FIXME
      | lval '=' expr           { $$ = new cdk::assignment_node(LINE, $1, $3); }
      ;
+
+exps : expr          { $$ = new m19::expressions_node(LINE, $1); }
+	   | exps ',' expr { $$ = new m19::expressions_node(LINE, $3, $1); }
+	   ;
 
 lval : tIDENTIFIER             { $$ = new cdk::variable_node(LINE, $1); }
      ;

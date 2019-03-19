@@ -33,6 +33,14 @@ void m19::xml_writer::do_sequence_node(cdk::sequence_node * const node, int lvl)
   closeTag(node, lvl);
 }
 
+void m19::xml_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
+  os() << std::string(lvl, ' ') << "<expressions_node size='" << node->size() << "'>" << std::endl;
+  for (size_t i = 0; i < node->size(); i++)
+    node->node(i)->accept(this, lvl + 2);
+  closeTag(node, lvl);
+}
+
+
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_integer_node(cdk::integer_node * const node, int lvl) {
