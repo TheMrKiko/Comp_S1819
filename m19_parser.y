@@ -12,6 +12,7 @@
 
 %union {
   int                    i;	/* integer value */
+  double                 r; /*double value*/
   std::string           *s;	/* symbol name or string literal */
   cdk::basic_node       *node;	/* node pointer */
   cdk::sequence_node    *sequence;
@@ -20,6 +21,7 @@
 };
 
 %token <i> tINTEGER
+%token <r> tREAL
 %token <s> tIDENTIFIER tSTRING
 %token tIF tPRINT tREAD
 
@@ -58,11 +60,12 @@ stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE
      | '{' list '}'                         { $$ = $2; }
      ;
 
-expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); } //TOBECHANGED
+expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); }
+     | tREAL                   { $$ = new cdk::double_node(LINE, $1); }
 	   | tSTRING                 { $$ = new cdk::string_node(LINE, $1); } //Maybe
      | '-' expr %prec tUNARY   { $$ = new cdk::neg_node(LINE, $2); } // Fica
-     | '+' expr %prec tUNARY   { $$ = $2; } //TODO imp unary
-     | '?' lval %prec tUNARY   { $$ = new m19::ref_node(LINE, $2); } //TODO imp unary
+     | '+' expr %prec tUNARY   { $$ = $2; }
+     | '?' lval %prec tUNARY   { $$ = new m19::ref_node(LINE, $2); } //done
      | '~' expr %prec tUNARY   { $$ = new cdk::not_node(LINE, $2); } //FROM CDK
      | expr '&&' expr	         { $$ = new cdk::and_node(LINE, $1, $3); } //FROM CDK
      | expr '||' expr	         { $$ = new cdk::or_node(LINE, $1, $3); } //FROM CDK

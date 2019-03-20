@@ -68,6 +68,10 @@ void m19::xml_writer::do_ref_node(m19::ref_node * const node, int lvl) {
   //do_unary_expression(node, lvl); //FIXME ?
 }
 
+void m19::xml_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
+  //do_unary_expression(node, lvl); //FIXME ?
+}
+
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_binary_expression(cdk::binary_expression_node * const node, int lvl) {
@@ -211,4 +215,8 @@ void m19::xml_writer::do_if_else_node(m19::if_else_node * const node, int lvl) {
   node->elseblock()->accept(this, lvl + 4);
   closeTag("else", lvl + 2);
   closeTag(node, lvl);
+}
+
+void m19::xml_writer::do_index_node(m19::index_node * const node, int lvl) {
+  //FIXME
 }

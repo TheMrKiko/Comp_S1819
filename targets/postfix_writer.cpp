@@ -73,6 +73,12 @@ void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) {
   _pf.NEG(); // 2-complement*/ //FIXME
 }
 
+void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
+  /*ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl); // determine the value
+  _pf.NEG(); // 2-complement*/ //FIXME
+}
+
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_add_node(cdk::add_node * const node, int lvl) {
@@ -281,4 +287,10 @@ void m19::postfix_writer::do_if_else_node(m19::if_else_node * const node, int lv
   _pf.LABEL(mklbl(lbl1));
   node->elseblock()->accept(this, lvl + 2);
   _pf.LABEL(mklbl(lbl1 = lbl2));
+}
+
+//---------------------------------------------------------------------------
+
+void m19::postfix_writer::do_index_node(m19::index_node * const node, int lvl) {
+  //FIXME
 }

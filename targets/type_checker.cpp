@@ -67,6 +67,10 @@ void m19::type_checker::do_ref_node(m19::ref_node * const node, int lvl) {
   //processUnaryExpression(node, lvl); //FIXME ?
 }
 
+void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) {
+  //processUnaryExpression(node, lvl); //FIXME ?
+}
+
 //---------------------------------------------------------------------------
 
 void m19::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {
@@ -200,4 +204,10 @@ void m19::type_checker::do_if_node(m19::if_node * const node, int lvl) {
 
 void m19::type_checker::do_if_else_node(m19::if_else_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
+}
+
+//---------------------------------------------------------------------------
+
+void m19::type_checker::do_index_node(m19::index_node * const node, int lvl) {
+  //FIXME
 }
