@@ -33,11 +33,11 @@ void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
   }
 }
 
-void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
+/*void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
   for (size_t i = 0; i < node->size(); i++) {
     node->node(i)->accept(this, lvl);
   }
-}
+}*/
 
 //---------------------------------------------------------------------------
 

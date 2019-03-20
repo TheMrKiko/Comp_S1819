@@ -17,7 +17,6 @@
   cdk::sequence_node    *sequence;
   cdk::expression_node  *expression; /* expression nodes */
   cdk::lvalue_node      *lvalue;
-  m19::expressions_node *expressions;
 };
 
 %token <i> tINTEGER
@@ -33,11 +32,9 @@
 %nonassoc tUNARY
 
 %type <node> stmt program
-%type <sequence> list
+%type <sequence> list exps
 %type <expression> expr
 %type <lvalue> lval
-%type <expressions> exps
-
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
 %}
@@ -86,8 +83,8 @@ expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); } //TOBEC
      //PENSAR EM []
      ;
 
-exps : expr          { $$ = new m19::expressions_node(LINE, $1); }
-	   | exps ',' expr { $$ = new m19::expressions_node(LINE, $3, $1); }
+exps : expr          { $$ = new cdk::sequence_node(LINE, $1); }
+	   | exps ',' expr { $$ = new cdk::sequence_node(LINE, $3, $1); }
 	   ;
 
 lval : tIDENTIFIER             { $$ = new cdk::variable_node(LINE, $1); }
