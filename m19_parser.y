@@ -22,7 +22,7 @@
 
 %token <i> tINTEGER
 %token <s> tIDENTIFIER tSTRING
-%token tIF tPRINT tREAD tBEGIN tEND
+%token tIF tPRINT tREAD
 
 %nonassoc tIFEX
 
@@ -51,9 +51,9 @@ list : stmt	     { $$ = new cdk::sequence_node(LINE, $1); }
 	   ;
 
 
-stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE, $1); }
- 	   | tPRINT expr ';'                      { $$ = new m19::print_node(LINE, $2); }
-     | tREAD lval ';'                       { $$ = new m19::read_node(LINE, $2); }
+stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE, $1); } //Fica
+ 	   | tPRINT expr ';'                      { $$ = new m19::print_node(LINE, $2); } //TOBECHANGED
+     | tREAD lval ';'                       { $$ = new m19::read_node(LINE, $2); } //TOBECHANGED
      | '[' expr ']' '#' stmt                { $$ = new m19::if_node(LINE, $2, $5); }
      | '[' expr ']' '?' stmt %prec tIFEX    { $$ = new m19::if_node(LINE, $2, $5); }
      | '[' expr ']' '?' stmt ':' stmt       { $$ = new m19::if_else_node(LINE, $2, $5, $7); }
@@ -61,23 +61,29 @@ stmt : expr ';'                             { $$ = new m19::evaluation_node(LINE
      | '{' list '}'                         { $$ = $2; }
      ;
 
-expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); }
-	   | tSTRING                 { $$ = new cdk::string_node(LINE, $1); }
-     | '-' expr %prec tUNARY   { $$ = new cdk::neg_node(LINE, $2); }
-     | expr '+' expr	         { $$ = new cdk::add_node(LINE, $1, $3); }
-     | expr '-' expr	         { $$ = new cdk::sub_node(LINE, $1, $3); }
-     | expr '*' expr	         { $$ = new cdk::mul_node(LINE, $1, $3); }
-     | expr '/' expr	         { $$ = new cdk::div_node(LINE, $1, $3); }
-     | expr '%' expr	         { $$ = new cdk::mod_node(LINE, $1, $3); }
-     | expr '<' expr	         { $$ = new cdk::lt_node(LINE, $1, $3); }
-     | expr '>' expr	         { $$ = new cdk::gt_node(LINE, $1, $3); }
-     | expr tGE expr	         { $$ = new cdk::ge_node(LINE, $1, $3); }
-     | expr tLE expr           { $$ = new cdk::le_node(LINE, $1, $3); }
-     | expr tNE expr	         { $$ = new cdk::ne_node(LINE, $1, $3); }
-     | expr tEQ expr	         { $$ = new cdk::eq_node(LINE, $1, $3); }
-     | '(' expr ')'            { $$ = $2; }
+expr : tINTEGER                { $$ = new cdk::integer_node(LINE, $1); } //TOBECHANGED
+	   | tSTRING                 { $$ = new cdk::string_node(LINE, $1); } //Maybe
+     | '-' expr %prec tUNARY   { $$ = new cdk::neg_node(LINE, $2); } // Fica
+     | '+' expr %prec tUNARY   { $$ = new m19::pos_node(LINE, $2); } //TODO imp unary
+     | '?' expr %prec tUNARY   { $$ = new m19::ref_node(LINE, $2); } //TODO imp unary
+     | '~' expr %prec tUNARY   { $$ = new cdk::not_node(LINE, $2); } //FROM CDK
+     | expr '&&' expr	         { $$ = new cdk::and_node(LINE, $1, $3); } //FROM CDK
+     | expr '||' expr	         { $$ = new cdk::or_node(LINE, $1, $3); } //FROM CDK
+     | expr '+' expr	         { $$ = new cdk::add_node(LINE, $1, $3); } //Fica
+     | expr '-' expr	         { $$ = new cdk::sub_node(LINE, $1, $3); } //Fica
+     | expr '*' expr	         { $$ = new cdk::mul_node(LINE, $1, $3); } //Fica
+     | expr '/' expr	         { $$ = new cdk::div_node(LINE, $1, $3); } //Fica
+     | expr '%' expr	         { $$ = new cdk::mod_node(LINE, $1, $3); } //Fica
+     | expr '<' expr	         { $$ = new cdk::lt_node(LINE, $1, $3); } //Fica
+     | expr '>' expr	         { $$ = new cdk::gt_node(LINE, $1, $3); } //Fica
+     | expr tGE expr	         { $$ = new cdk::ge_node(LINE, $1, $3); } //Fica
+     | expr tLE expr           { $$ = new cdk::le_node(LINE, $1, $3); } //Fica
+     | expr tNE expr	         { $$ = new cdk::ne_node(LINE, $1, $3); } //Fica
+     | expr tEQ expr	         { $$ = new cdk::eq_node(LINE, $1, $3); } //Fica
+     | '(' expr ')'            { $$ = $2; } //Fica
      | lval                    { $$ = new cdk::rvalue_node(LINE, $1); }  //FIXME
-     | lval '=' expr           { $$ = new cdk::assignment_node(LINE, $1, $3); }
+     | lval '=' expr           { $$ = new cdk::assignment_node(LINE, $1, $3); } //Fica
+     //PENSAR EM []
      ;
 
 exps : expr          { $$ = new m19::expressions_node(LINE, $1); }
