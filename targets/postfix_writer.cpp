@@ -67,6 +67,12 @@ void m19::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
   _pf.NEG(); // 2-complement
 }
 
+void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) {
+  /*ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl); // determine the value
+  _pf.NEG(); // 2-complement*/ //FIXME
+}
+
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_add_node(cdk::add_node * const node, int lvl) {

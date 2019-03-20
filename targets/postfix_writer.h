@@ -24,8 +24,6 @@ namespace m19 {
         basic_ast_visitor(compiler), _symtab(symtab), _pf(pf), _lbl(0) {
     }
 
-  //void do_expressions_node(m19::expressions_node * const node, int lvl); 
-
   public:
     ~postfix_writer() {
       os().flush();

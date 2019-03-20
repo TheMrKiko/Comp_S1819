@@ -6,6 +6,7 @@
 #include <cdk/ast/sequence_node.h>
 #include <cdk/ast/expression_node.h>
 #include "ast/expressions_node.h"
+#include "ast/ref_node.h"
 #include <cdk/ast/lvalue_node.h>
 #include "m19_parser.tab.h"
 
@@ -23,10 +24,10 @@
 "=="                   return tEQ; 
 "!="                   return tNE; 
 
- //"print"                return tPRINT
- //"read"                 return tREAD; 
- //"begin"                return tBEGIN; 
- //"end"                  return tEND; 
+"print"                return tPRINT;
+"read"                 return tREAD; 
+"begin"                return tBEGIN; 
+"end"                  return tEND; 
 
 [A-Za-z][A-Za-z0-9_]*  yylval.s = new std::string(yytext); return tIDENTIFIER;
 

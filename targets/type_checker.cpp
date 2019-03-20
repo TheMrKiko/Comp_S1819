@@ -63,6 +63,10 @@ void m19::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
   processUnaryExpression(node, lvl);
 }
 
+void m19::type_checker::do_ref_node(m19::ref_node * const node, int lvl) {
+  //processUnaryExpression(node, lvl); //FIXME ?
+}
+
 //---------------------------------------------------------------------------
 
 void m19::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {

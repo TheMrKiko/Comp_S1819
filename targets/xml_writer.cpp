@@ -64,6 +64,10 @@ void m19::xml_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
   do_unary_expression(node, lvl);
 }
 
+void m19::xml_writer::do_ref_node(m19::ref_node * const node, int lvl) {
+  //do_unary_expression(node, lvl); //FIXME ?
+}
+
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_binary_expression(cdk::binary_expression_node * const node, int lvl) {
