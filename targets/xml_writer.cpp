@@ -233,6 +233,10 @@ void m19::xml_writer::do_block_node(m19::block_node * const node, int lvl) {
   //FIXME
 }
 
+void m19::xml_writer::do_return_node(m19::return_node * const node, int lvl) {
+  //FIXME
+}
+
 void m19::xml_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
   //FIXME
 }
