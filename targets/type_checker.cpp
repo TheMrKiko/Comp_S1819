@@ -259,3 +259,7 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
 void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
   //FIXME
 }
+
+void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
+  //FIXME
+}

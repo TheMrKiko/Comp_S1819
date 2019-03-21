@@ -1,6 +1,7 @@
-#ifndef __VAR_DECL_NODE_H__
-#define __VAR_DECL_NODE_H__
+#ifndef __M19_VAR_DECL_NODE_H__
+#define __M19_VAR_DECL_NODE_H__
 
+#include <string>
 #include <cdk/ast/basic_node.h>
 #include <cdk/ast/expression_node.h>
 #include <cdk/basic_type.h>
