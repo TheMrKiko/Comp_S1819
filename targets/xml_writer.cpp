@@ -235,3 +235,7 @@ void m19::xml_writer::do_fun_init_section_node(m19::fun_init_section_node * cons
 void m19::xml_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
   //FIXME
 }
+
+void m19::xml_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
+  //FIXME
+}

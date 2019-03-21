@@ -227,3 +227,7 @@ void m19::type_checker::do_fun_init_section_node(m19::fun_init_section_node * co
 void m19::type_checker::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
   //FIXME
 }
+
+void m19::type_checker::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
+  //FIXME
+}

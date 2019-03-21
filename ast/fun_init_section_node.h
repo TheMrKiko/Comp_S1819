@@ -1,7 +1,7 @@
 #ifndef __M19_INIT_SECTION_INDEX_H__
 #define __M19_INIT_SECTION_INDEX_H__
 
-#include <cdk/ast/lvalue_node.h>
+#include <cdk/ast/basic_node.h>
 #include "targets/basic_ast_visitor.h"
 
 

@@ -1,8 +1,8 @@
 #ifndef __M19_FINAL_SECTION_INDEX_H__
 #define __M19_FINAL_SECTION_INDEX_H__
 
+#include <cdk/ast/basic_node.h>
 #include "targets/basic_ast_visitor.h"
-
 
 namespace m19 {
 
