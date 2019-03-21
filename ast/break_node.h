@@ -1,5 +1,5 @@
-#ifndef __M19_BREAK_H__
-#define __M19_BREAK_H__
+#ifndef __M19_BREAK_NODE_H__
+#define __M19_BREAK_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 

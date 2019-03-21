@@ -1,5 +1,5 @@
-#ifndef __M19_FUN_CALL_H__
-#define __M19_FUN_CALL_H__
+#ifndef __M19_FUN_CALL_NODE_H__
+#define __M19_FUN_CALL_NODE_H__
 
 #include <string>
 #include <cdk/ast/basic_node.h>

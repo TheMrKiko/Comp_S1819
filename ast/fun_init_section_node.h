@@ -1,5 +1,5 @@
-#ifndef __M19_INIT_SECTION_INDEX_H__
-#define __M19_INIT_SECTION_INDEX_H__
+#ifndef __M19_INIT_SECTION_NODE_H__
+#define __M19_INIT_SECTION_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 #include "targets/basic_ast_visitor.h"
@@ -12,7 +12,7 @@ namespace m19 {
 
   public:
     fun_init_section_node(int lineno, m19::block_node *block) :
-        cdk::basic_node(lineno), _block() {
+        cdk::basic_node(lineno), _block(block) {
     }
 
   public:

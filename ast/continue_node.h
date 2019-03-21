@@ -1,5 +1,5 @@
-#ifndef __M19_CONTINUE_H__
-#define __M19_CONTINUE_H__
+#ifndef __M19_CONTINUE_NODE_H__
+#define __M19_CONTINUE_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 

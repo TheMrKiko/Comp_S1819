@@ -1,5 +1,5 @@
-#ifndef __M19_ALLOC_H__
-#define __M19_ALLOC_H__
+#ifndef __M19_ALLOC_NODE_H__
+#define __M19_ALLOC_NODE_H__
 
 #include <cdk/ast/unary_expression_node.h>
 

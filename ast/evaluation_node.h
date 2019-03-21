@@ -1,6 +1,6 @@
-// $Id: evaluation_node.h,v 1.1 2019/02/28 21:26:01 linux Exp $
-#ifndef __M19_EVALUATIONNODE_H__
-#define __M19_EVALUATIONNODE_H__
+// $Id: evaluation_node.h,v 1.2 2019/03/21 19:00:02 ist186400 Exp $
+#ifndef __M19_EVALUATION_NODE_H__
+#define __M19_EVALUATION_NODE_H__
 
 #include <cdk/ast/expression_node.h>
 

@@ -1,6 +1,6 @@
-// $Id: for_node.h,v 1.3 2019/03/20 16:22:53 ist186400 Exp $ -*- c++ -*-
-#ifndef __M19_FORNODE_H__
-#define __M19_FORNODE_H__
+// $Id: for_node.h,v 1.4 2019/03/21 19:00:02 ist186400 Exp $ -*- c++ -*-
+#ifndef __M19_FOR_NODE_H__
+#define __M19_FOR_NODE_H__
 
 #include <cdk/ast/expression_node.h>
 // include sequence?

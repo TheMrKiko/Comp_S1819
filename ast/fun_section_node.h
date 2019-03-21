@@ -1,5 +1,5 @@
-#ifndef __M19_SECTION_INDEX_H__
-#define __M19_SECTION_INDEX_H__
+#ifndef __M19_SECTION_NODE_H__
+#define __M19_SECTION_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 #include "targets/basic_ast_visitor.h"

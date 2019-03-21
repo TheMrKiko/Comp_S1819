@@ -1,5 +1,5 @@
-#ifndef __M19_RETURN_H__
-#define __M19_RETURN_H__
+#ifndef __M19_RETURN_NODE_H__
+#define __M19_RETURN_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 

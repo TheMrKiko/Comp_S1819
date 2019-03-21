@@ -1,5 +1,5 @@
-#ifndef __M19_BLOCK_H__
-#define __M19_BLOCK_H__
+#ifndef __M19_BLOCK_NODE_H__
+#define __M19_BLOCK_NODE_H__
 
 #include <cdk/ast/basic_node.h>
 #include "targets/basic_ast_visitor.h"
