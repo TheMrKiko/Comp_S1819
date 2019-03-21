@@ -10,6 +10,10 @@
 
 void m19::type_checker::do_sequence_node(cdk::sequence_node * const node, int lvl) {
   // EMPTY
+} 
+
+void m19::type_checker::do_continue_node(m19::continue_node * const node, int lvl) {
+  // EMPTY
 }
 
 /*void m19::type_checker::do_expressions_node(m19::expressions_node * const node, int lvl) {

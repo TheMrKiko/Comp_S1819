@@ -33,6 +33,9 @@ void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
   }
 }
 
+void m19::postfix_writer::do_continue_node(m19::continue_node * const node, int lvl) {
+}
+
 /*void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
   for (size_t i = 0; i < node->size(); i++) {
     node->node(i)->accept(this, lvl);
@@ -72,6 +75,7 @@ void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) {
   node->argument()->accept(this, lvl); // determine the value
   _pf.NEG(); // 2-complement*/ //FIXME
 }
+
 
 void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
   /*ASSERT_SAFE_EXPRESSIONS;
