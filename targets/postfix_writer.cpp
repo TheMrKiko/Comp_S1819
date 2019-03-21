@@ -336,6 +336,10 @@ void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int 
   //FIXME
 }
 
+void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
+  //FIXME
+}
+
 void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
   //FIXME
 }
