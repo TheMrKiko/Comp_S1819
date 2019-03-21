@@ -34,6 +34,11 @@ void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
 }
 
 void m19::postfix_writer::do_continue_node(m19::continue_node * const node, int lvl) {
+  // FIXME
+}
+
+void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) {
+  // FIXME
 }
 
 /*void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {

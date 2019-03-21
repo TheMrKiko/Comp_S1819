@@ -13,7 +13,11 @@ void m19::type_checker::do_sequence_node(cdk::sequence_node * const node, int lv
 } 
 
 void m19::type_checker::do_continue_node(m19::continue_node * const node, int lvl) {
-  // EMPTY
+  // FIXME
+}
+
+void m19::type_checker::do_break_node(m19::break_node * const node, int lvl) {
+  // FIXME
 }
 
 /*void m19::type_checker::do_expressions_node(m19::expressions_node * const node, int lvl) {
