@@ -294,3 +294,15 @@ void m19::postfix_writer::do_if_else_node(m19::if_else_node * const node, int lv
 void m19::postfix_writer::do_index_node(m19::index_node * const node, int lvl) {
   //FIXME
 }
+
+void m19::postfix_writer::do_block_node(m19::block_node * const node, int lvl) {
+  //FIXME
+}
+
+void m19::postfix_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
+  //FIXME
+}
+
+void m19::postfix_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
+  //FIXME
+}

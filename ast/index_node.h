@@ -1,5 +1,5 @@
-#ifndef __M19_AST_LEFT_INDEX_H__
-#define __M19_AST_LEFT_INDEX_H__
+#ifndef __M19_INDEX_H__
+#define __M19_INDEX_H__
 
 #include <cdk/ast/lvalue_node.h>
 #include "targets/basic_ast_visitor.h"
@@ -31,6 +31,6 @@ namespace m19 {
 
   };
 
-}
+} // m19
 
 #endif

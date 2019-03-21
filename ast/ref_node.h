@@ -1,5 +1,5 @@
-#ifndef __M19_AST_REF_H__
-#define __M19_AST_REF_H__
+#ifndef __M19_REF_H__
+#define __M19_REF_H__
 
 #include <cdk/ast/unary_expression_node.h>
 #include "targets/basic_ast_visitor.h"
@@ -26,6 +26,6 @@ namespace m19 {
 
   };
 
-}
+} // m19
 
 #endif
