@@ -176,10 +176,6 @@ void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, in
 
 //---------------------------------------------------------------------------
 
-void m19::type_checker::do_program_node(m19::program_node * const node, int lvl) {
-  // EMPTY
-}
-
 void m19::type_checker::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
 }

@@ -23,9 +23,7 @@
 "!="                   return tNE; 
 
 "print"                return tPRINT;
-"read"                 return tREAD; 
-"begin"                return tBEGIN; 
-"end"                  return tEND; 
+"read"                 return tREAD;
 
 [A-Za-z][A-Za-z0-9_]*  yylval.s = new std::string(yytext); return tIDENTIFIER;
 

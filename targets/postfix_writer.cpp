@@ -190,7 +190,7 @@ void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 }
 
 //---------------------------------------------------------------------------
-
+/*
 void m19::postfix_writer::do_program_node(m19::program_node * const node, int lvl) {
   // Note that Simple doesn't have functions. Thus, it doesn't need
   // a function node. However, it must start in the main function.
@@ -218,7 +218,7 @@ void m19::postfix_writer::do_program_node(m19::program_node * const node, int lv
   _pf.EXTERN("prints");
   _pf.EXTERN("println");
 }
-
+*/
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
