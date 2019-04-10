@@ -100,8 +100,6 @@ inline char* sci(char* scichar) {
 
  /*<X_STRING>\n           yyerror("newline in string");*/
 
-[0-9]+                 	yylval.i = strtol(yytext, nullptr, 10); return tINTEGER;
-
 0x[0-9A-Fa-f]+          yylval.i = strtol(yytext, nullptr, 16); return tINTEGER;
 
 [0-9]+\.[0-9]+			yylval.r = strtod(yytext, nullptr); return tREAL;
@@ -109,6 +107,8 @@ inline char* sci(char* scichar) {
 
 [0-9]+					realint = strdup(yytext); yy_push_state(X_R_INI);
 <X_R_INI>[fpnumkMGTPE] 	realsci = strdup(yytext); yy_push_state(X_R_SCI);
+<X_R_INI>. 				yylval.i = strtol(yytext, nullptr, 10); yy_pop_state(); return tINTEGER;
+
 <X_R_SCI>[0-9]+ 		{
 							char* str = strcat(realint, strcat(ponto, strcat(yytext, strcat(e_let, sci(realsci)))));
 							yylval.r = strtod(str, nullptr);

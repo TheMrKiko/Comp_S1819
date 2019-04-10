@@ -34,7 +34,7 @@
 %token <s> tIDENTIFIER tSTRING
 %token tPRINTLN tREAD tPUNCH tCONT tBREAK tINSEC tOUTSEC
 
-%nonassoc tIFEX
+%nonassoc tIFEX tVDECX tFDECX
 
 %right '='
 %left tGE tLE tEQ tNE '>' '<'
@@ -49,7 +49,7 @@
 %type <sequence> decls exps args vars secs stmts
 %type <expression> expr lit
 %type <lvalue> lval
-%type <btype> type functype
+%type <btype> type
 %type <body> body
 %type <init> ini
 %type <final> fin
@@ -70,15 +70,19 @@ decl : var ';'                               { $$ = $1; }
      | func                                  { $$ = $1; }
      ;
 
-var  : type tIDENTIFIER qali                 { $$ = new m19::var_decl_node(LINE, $3, $1, *$2);       }
+var  : type tIDENTIFIER qali %prec tVDECX    { $$ = new m19::var_decl_node(LINE, $3, $1, *$2);       }
      | type tIDENTIFIER qali '=' expr        { $$ = new m19::var_decl_node(LINE, $3, $1, *$2, $5);   }
      ;
 
-func : functype tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $5);        }
-     | functype tIDENTIFIER qali '(' args ')' '=' lit       { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $8, $5);    }
+func : type tIDENTIFIER qali '(' args ')' %prec tFDECX               { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $5);        }
+     | '!'  tIDENTIFIER qali '(' args ')' %prec tFDECX               { $$ = new m19::fun_decl_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $5);        }
+     | type tIDENTIFIER qali '(' args ')' '=' lit %prec tFDECX       { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $8, $5);    }
+     | '!'  tIDENTIFIER qali '(' args ')' '=' lit %prec tFDECX       { $$ = new m19::fun_decl_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $8, $5);    }
 
-     | functype tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $7, $5);     }
-     | functype tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $9, $8, $5); }
+     | type tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $7, $5);     }
+     | '!'  tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $7, $5);     }
+     | type tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $9, $8, $5); }
+     | '!'  tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $9, $8, $5); }
      ;
 
 lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, $1);           }
@@ -88,7 +92,7 @@ lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
 
 
 body : ini  secs fin                         { $$ = new m19::fun_body_node(LINE, $1,      $2,      $3);      }
-     | ini  secs                             { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
+     | ini  secs %prec                       { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
      | ini       fin                         { $$ = new m19::fun_body_node(LINE, $1,      nullptr, $2);      }
      | ini                                   { $$ = new m19::fun_body_node(LINE, $1,      nullptr, nullptr); }
      |      secs fin                         { $$ = new m19::fun_body_node(LINE, nullptr, $1,      $2);      }
@@ -138,10 +142,6 @@ type : '#'                                   { $$ = new basic_type(4, basic_type
      | '$'                                   { $$ = new basic_type(4, basic_type::TYPE_STRING);                     }
      | '<' type '>'                          { $$ = new basic_type(4, basic_type::TYPE_POINTER); $$->_subtype = $2; }
      ;
-
-functype : type                              { $$ = $1;                                        }
-         | '!'                               { $$ = new basic_type(0, basic_type::TYPE_VOID);  }
-         ;
 
 stmt : expr ';'                              { $$ = new m19::evaluation_node(LINE, $1);        }
  	| expr '!'                              { $$ = new m19::print_node(LINE, $1, false);      }
