@@ -295,11 +295,29 @@ void m19::xml_writer::do_return_val_node(m19::return_val_node * const node, int 
 }
 
 void m19::xml_writer::do_fun_call_node(m19::fun_call_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag('identifier', lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
+  closeTag('identifier', lvl + 2);
+
+  openTag('arguments', lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag('arguments', lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag('identifier', lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
+  closeTag('identifier', lvl + 2);
+
+  openTag('arguments', lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag('arguments', lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
