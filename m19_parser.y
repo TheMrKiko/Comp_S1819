@@ -92,7 +92,7 @@ lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
 
 
 body : ini  secs fin                         { $$ = new m19::fun_body_node(LINE, $1,      $2,      $3);      }
-     | ini  secs %prec                       { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
+     | ini  secs                             { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
      | ini       fin                         { $$ = new m19::fun_body_node(LINE, $1,      nullptr, $2);      }
      | ini                                   { $$ = new m19::fun_body_node(LINE, $1,      nullptr, nullptr); }
      |      secs fin                         { $$ = new m19::fun_body_node(LINE, nullptr, $1,      $2);      }
