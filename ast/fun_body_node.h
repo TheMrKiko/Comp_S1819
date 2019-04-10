@@ -7,8 +7,8 @@ namespace m19 {
 
   class fun_body_node: public cdk::basic_node {
 
-    m19::fun_init_section_node* _initial_node;
-    cdk::sequence_node* _sections;
+    m19::fun_init_section_node*  _initial_node;
+    cdk::sequence_node*          _sections;
     m19::fun_final_section_node* _final_node;
 
   public:
