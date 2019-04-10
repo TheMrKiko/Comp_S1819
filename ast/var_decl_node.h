@@ -15,7 +15,7 @@ namespace m19 {
     cdk::expression_node *_initializer;
 
   public:
-    var_decl_node(int lineno, int qualifier, basic_type* varType, const std::string &identifier, cdk::expression_node* initializer) :
+    var_decl_node(int lineno, int qualifier, basic_type* varType, const std::string &identifier, cdk::expression_node* initializer = nullptr) :
         cdk::basic_node(lineno), _qualifier(qualifier), _varType(varType), _identifier(identifier), _initializer(initializer) {
     }
 

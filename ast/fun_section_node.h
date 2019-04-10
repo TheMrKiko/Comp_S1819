@@ -13,7 +13,7 @@ namespace m19 {
     cdk::expression_node *_condition;
 
   public:
-    fun_section_node(int lineno, m19::block_node *block, bool exclusive = false, cdk::expression_node *condition = nullptr) :
+    fun_section_node(int lineno, m19::block_node *block, bool exclusive, cdk::expression_node *condition = nullptr) :
         cdk::basic_node(lineno), _block(block), _exclusive(exclusive), _condition(condition) {
     }
 

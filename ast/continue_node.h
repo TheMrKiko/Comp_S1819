@@ -6,18 +6,13 @@
 namespace m19 {
 
   class continue_node: public cdk::basic_node {
-    int _level;
 
   public:
-    continue_node(int lineno, int level = 1) :
-        cdk::basic_node(lineno), _level(level) {
+    continue_node(int lineno) :
+        cdk::basic_node(lineno) {
     }
 
   public:
-    int level() const {
-      return _level;
-    }
-
     void accept(basic_ast_visitor *sp, int level) {
       sp->do_continue_node(this, level);
     }

@@ -13,16 +13,16 @@ namespace m19 {
     basic_type *_type;
     std::string _identifier;
     int _qualifier;
-    m19::block_node *_block;
+    m19::fun_body_node *_block;
     cdk::expression_node *_literal;
     cdk::sequence_node *_arguments;
 
   public:
-    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::sequence_node *arguments = nullptr) :
+    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::sequence_node *arguments) :
         cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _block(block), _arguments(arguments) {
     }
 
-    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::expression_node *literal, cdk::sequence_node *arguments = nullptr) :
+    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::expression_node *literal, cdk::sequence_node *arguments) :
         cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _block(block), _literal(literal), _arguments(arguments) {
     }
 
