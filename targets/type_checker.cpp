@@ -20,10 +20,6 @@ void m19::type_checker::do_break_node(m19::break_node * const node, int lvl) {
   // FIXME
 }
 
-/*void m19::type_checker::do_expressions_node(m19::expressions_node * const node, int lvl) {
-  // EMPTY
-}*/
-
 //---------------------------------------------------------------------------
 
 void m19::type_checker::do_nil_node(cdk::nil_node * const node, int lvl) {

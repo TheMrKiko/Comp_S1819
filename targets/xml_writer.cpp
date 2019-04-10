@@ -38,16 +38,9 @@ void m19::xml_writer::do_continue_node(m19::continue_node * const node, int lvl)
 }
 
 void m19::xml_writer::do_break_node(m19::break_node * const node, int lvl) {
-  // FIXME
-}
-
-/*void m19::xml_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
-  os() << std::string(lvl, ' ') << "<expressions_node size='" << node->size() << "'>" << std::endl;
-  for (size_t i = 0; i < node->size(); i++)
-    node->node(i)->accept(this, lvl + 2);
+  openTag(node, lvl);
   closeTag(node, lvl);
-}*/
-
+}
 
 //---------------------------------------------------------------------------
 
