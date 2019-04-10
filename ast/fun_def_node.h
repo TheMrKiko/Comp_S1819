@@ -13,17 +13,17 @@ namespace m19 {
     basic_type *_type;
     std::string _identifier;
     int _qualifier;
-    m19::fun_body_node *_block;
+    m19::fun_body_node *_body;
     cdk::expression_node *_literal;
     cdk::sequence_node *_arguments;
 
   public:
-    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::sequence_node *arguments) :
-        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _block(block), _arguments(arguments) {
+    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::fun_body_node *body, cdk::sequence_node *arguments) :
+        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _body(body), _arguments(arguments) {
     }
 
-    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::block_node *block, cdk::expression_node *literal, cdk::sequence_node *arguments) :
-        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _block(block), _literal(literal), _arguments(arguments) {
+    fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::fun_body_node *body, cdk::expression_node *literal, cdk::sequence_node *arguments) :
+        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _body(body), _literal(literal), _arguments(arguments) {
     }
 
   public:
@@ -39,8 +39,8 @@ namespace m19 {
     cdk::sequence_node *arguments() {
       return _arguments;
     }
-    m19::block_node *block() {
-      return _block;
+    m19::fun_body_node *body() {
+      return _body;
     }
 
     cdk::expression_node *literal() {

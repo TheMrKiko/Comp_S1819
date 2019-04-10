@@ -21,7 +21,12 @@
 
   basic_type            *btype;
 
-  /*meter block node? */
+  m19::fun_body_node            *body;
+  m19::fun_init_section_node    *init;
+  m19::fun_final_section_node   *final;
+  m19::block_node               *block;
+
+
 };
 
 %token <i> tINTEGER
@@ -40,11 +45,15 @@
 
 %type <i> qali
 %type <s> strs
-%type <node> stmt program decl var func body ini fin sec blck lit
+%type <node> stmt program decl var func sec
 %type <sequence> decls exps args vars secs stmts
-%type <expression> expr
+%type <expression> expr lit
 %type <lvalue> lval
 %type <btype> type functype
+%type <body> body
+%type <init> ini
+%type <final> fin
+%type <block> blck
 %{
 //-- The rules below will be included in yyparse, the main parsing function.
 %}
@@ -61,15 +70,15 @@ decl : var ';'                               { $$ = $1; }
      | func                                  { $$ = $1; }
      ;
 
-var  : type tIDENTIFIER qali                 { $$ = new m19::var_decl_node(LINE, $3, $1, $2);       }
-     | type tIDENTIFIER qali '=' expr        { $$ = new m19::var_decl_node(LINE, $3, $1, $2, $5);   }
+var  : type tIDENTIFIER qali                 { $$ = new m19::var_decl_node(LINE, $3, $1, *$2);       }
+     | type tIDENTIFIER qali '=' expr        { $$ = new m19::var_decl_node(LINE, $3, $1, *$2, $5);   }
      ;
 
-func : functype tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl_node(LINE, $1, $2, $3, $5);        }
-     | functype tIDENTIFIER qali '(' args ')' '=' lit       { $$ = new m19::fun_decl_node(LINE, $1, $2, $3, $8, $5);    }
+func : functype tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $5);        }
+     | functype tIDENTIFIER qali '(' args ')' '=' lit       { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $8, $5);    }
 
-     | functype tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, $2, $3, $7, $5);     }
-     | functype tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, $1, $2, $3, $9, $8, $5); }
+     | functype tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $7, $5);     }
+     | functype tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $9, $8, $5); }
      ;
 
 lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, $1);           }
@@ -160,7 +169,7 @@ exps :          expr                         { $$ = new cdk::sequence_node(LINE,
 	;
 
 strs :      tSTRING                          { $$ = $1;                                   }
-     | strs tSTRING                          { $$ = $1 + $2;                              }
+     | strs tSTRING                          { $$ = new std::string(*$1 + *$2);                              }
      ;
 
 expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, $1);           }
@@ -189,7 +198,7 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    } 
      ;
 
-lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, $1);          }
+lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);          }
      ;
 
 %%

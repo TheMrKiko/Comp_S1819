@@ -253,11 +253,11 @@ void m19::postfix_writer::do_print_node(m19::print_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_read_node(m19::read_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
+  /*ASSERT_SAFE_EXPRESSIONS;
   _pf.CALL("readi");
   _pf.LDFVAL32();
   node->argument()->accept(this, lvl);
-  _pf.STINT();
+  _pf.STINT();*/
 }
 
 //---------------------------------------------------------------------------
