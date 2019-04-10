@@ -11,15 +11,6 @@ void m19::xml_writer::do_nil_node(cdk::nil_node * const node, int lvl) {
 void m19::xml_writer::do_data_node(cdk::data_node * const node, int lvl) {
   // EMPTY
 }
-void m19::xml_writer::do_not_node(cdk::not_node * const node, int lvl) {
-  // EMPTY
-}
-void m19::xml_writer::do_and_node(cdk::and_node * const node, int lvl) {
-  // EMPTY
-}
-void m19::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
-  // EMPTY
-}
 
 //---------------------------------------------------------------------------
 
@@ -79,6 +70,10 @@ void m19::xml_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
   do_unary_expression(node, lvl);
 }
 
+void m19::xml_writer::do_not_node(cdk::not_node * const node, int lvl) {
+  do_unary_expression(node, lvl);  
+}
+
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_binary_expression(cdk::binary_expression_node * const node, int lvl) {
@@ -122,6 +117,12 @@ void m19::xml_writer::do_ne_node(cdk::ne_node * const node, int lvl) {
 void m19::xml_writer::do_eq_node(cdk::eq_node * const node, int lvl) {
   do_binary_expression(node, lvl);
 }
+void m19::xml_writer::do_and_node(cdk::and_node * const node, int lvl) {
+  do_binary_expression(node, lvl);  
+}
+void m19::xml_writer::do_or_node(cdk::or_node * const node, int lvl) {
+  do_binary_expression(node, lvl);
+}
 
 //---------------------------------------------------------------------------
 
@@ -149,14 +150,6 @@ void m19::xml_writer::do_assignment_node(cdk::assignment_node * const node, int 
 }
 
 //---------------------------------------------------------------------------
-/*
-void m19::xml_writer::do_program_node(m19::program_node * const node, int lvl) {
-  openTag(node, lvl);
-  node->statements()->accept(this, lvl + 4);
-  closeTag(node, lvl);
-}*/
-
-//---------------------------------------------------------------------------
 
 void m19::xml_writer::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
@@ -175,24 +168,35 @@ void m19::xml_writer::do_print_node(m19::print_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_read_node(m19::read_node * const node, int lvl) {
-  /*ASSERT_SAFE_EXPRESSIONS;
+  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
   node->argument()->accept(this, lvl + 2);
-  closeTag(node, lvl);*/
+  closeTag(node, lvl);
 }
 
 //---------------------------------------------------------------------------
 
 void m19::xml_writer::do_for_node(m19::for_node * const node, int lvl) {
-  /*ASSERT_SAFE_EXPRESSIONS;
+  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
+
+  openTag("init", lvl + 2);
+  node->init()->accept(this, lvl + 4);
+  closeTag("init", lvl + 2);
+
   openTag("condition", lvl + 2);
   node->condition()->accept(this, lvl + 4);
   closeTag("condition", lvl + 2);
+
+  openTag("after", lvl + 2);
+  node->after()->accept(this, lvl + 4);
+  closeTag("after", lvl + 2);
+
   openTag("block", lvl + 2);
   node->block()->accept(this, lvl + 4);
   closeTag("block", lvl + 2);
-  closeTag(node, lvl);*/
+
+  closeTag(node, lvl);
 }
 
 //---------------------------------------------------------------------------
@@ -225,27 +229,57 @@ void m19::xml_writer::do_if_else_node(m19::if_else_node * const node, int lvl) {
 }
 
 void m19::xml_writer::do_index_node(m19::index_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+
+  openTag("base", lvl + 2);
+  node->base()->accept(this, lvl + 4);
+  closeTag("base", lvl + 2);
+
+  openTag("index", lvl + 2);
+  node->index()->accept(this, lvl + 4);
+  closeTag("index", lvl + 2);
+
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_block_node(m19::block_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS; // preciso??
+  openTag(node, lvl);
+  openTag("declarations", lvl + 2);
+  do_sequence_node(node->declarations(), lvl + 4);
+  closeTag("declarations", lvl + 2);
+
+  openTag("instructions", lvl + 2);
+  do_sequence_node(node->instructions(), lvl + 4);
+  closeTag("instructions", lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_return_node(m19::return_node * const node, int lvl) {
-  //FIXME
+  openTag(node, lvl);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  node->block()->accept(this, lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  node->block()->accept(this, lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  node->block()->accept(this, lvl + 2);
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
