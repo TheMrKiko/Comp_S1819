@@ -41,7 +41,7 @@
 %left tAND tOR
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc tUNARY
+%nonassoc tUNARY ':'
 
 %type <i> qali
 %type <s> strs
