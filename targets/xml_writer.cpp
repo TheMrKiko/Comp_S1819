@@ -309,33 +309,121 @@ void m19::xml_writer::do_return_val_node(m19::return_val_node * const node, int 
 void m19::xml_writer::do_fun_call_node(m19::fun_call_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  openTag('identifier', lvl + 2);
+  openTag("identifier", lvl + 2);
   os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
-  closeTag('identifier', lvl + 2);
+  closeTag("identifier", lvl + 2);
 
-  openTag('arguments', lvl + 2);
+  openTag("arguments", lvl + 2);
   node->arguments()->accept(this, lvl + 4);
-  closeTag('arguments', lvl + 2);
+  closeTag("arguments", lvl + 2);
   closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  openTag('identifier', lvl + 2);
+  openTag("identifier", lvl + 2);
   os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
-  closeTag('identifier', lvl + 2);
+  closeTag("identifier", lvl + 2);
 
-  openTag('arguments', lvl + 2);
-  node->arguments()->accept(this, lvl + 4);
-  closeTag('arguments', lvl + 2);
+  openTag("type", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->varType() << std::endl;
+  closeTag("type", lvl + 2);
+
+  if (node->initializer()) {
+    openTag("initializer", lvl + 2);
+    node->initializer()->accept(this, lvl + 4);
+    closeTag("initializer", lvl + 2);
+  }
+
   closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("identifier", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
+  closeTag("identifier", lvl + 2);
+
+  openTag("qualifier", lvl + 2);
+  os() << std::string(lvl + 4, ' ');
+  switch (node->qualifier()) {
+    case 0:
+    os() << '0';
+    break;
+    case 1:
+    os() << '1';
+    break;
+    case 2:
+    os() << '2';
+    break;
+    default:
+    break;
+  }
+  os() << std::endl;
+  closeTag("qualifier", lvl + 2);
+
+  openTag("type", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
+  closeTag("type", lvl + 2);
+
+  if (node->literal()) {
+    openTag("literal", lvl + 2);
+    node->literal()->accept(this, lvl + 4);
+    closeTag("literal", lvl + 2);
+  }
+
+  openTag("arguments", lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag("arguments", lvl + 2);
+
+  closeTag(node, lvl);
 }
 
 void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  openTag(node, lvl);
+  openTag("identifier", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
+  closeTag("identifier", lvl + 2);
+
+  openTag("qualifier", lvl + 2);
+  os() << std::string(lvl + 4, ' ');
+  switch (node->qualifier()) {
+    case 0:
+    os() << '0';
+    break;
+    case 1:
+    os() << '1';
+    break;
+    case 2:
+    os() << '2';
+    break;
+    default:
+    break;
+  }
+  os() << std::endl;
+  closeTag("qualifier", lvl + 2);
+
+  openTag("type", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
+  closeTag("type", lvl + 2);
+
+  if (node->literal()) {
+    openTag("literal", lvl + 2);
+    node->literal()->accept(this, lvl + 4);
+    closeTag("literal", lvl + 2);
+  }
+
+  openTag("arguments", lvl + 2);
+  node->arguments()->accept(this, lvl + 4);
+  closeTag("arguments", lvl + 2);
+
+  openTag("body", lvl + 2);
+  node->body()->accept(this, lvl + 4);
+  closeTag("body", lvl + 2);
+
+  closeTag(node, lvl);
+  
 }

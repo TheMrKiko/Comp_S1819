@@ -37,6 +37,10 @@ namespace m19 {
       return _arguments;
     }
 
+    cdk::expression_node *literal() {
+      return _literal;
+    }
+
     void accept(basic_ast_visitor *sp, int level) {
       sp->do_fun_decl_node(this, level);
     }
