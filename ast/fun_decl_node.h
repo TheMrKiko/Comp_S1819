@@ -11,7 +11,6 @@ namespace m19 {
     basic_type *_type;
     std::string _identifier;
     int _qualifier;
-    cdk::expression_node *_literal;
     cdk::sequence_node *_arguments;
 
   public:

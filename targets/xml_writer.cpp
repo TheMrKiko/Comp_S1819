@@ -342,6 +342,11 @@ void m19::xml_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl)
 void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
+
+  openTag("type", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->type()->name() << std::endl;
+  closeTag("type", lvl + 2);
+
   openTag("identifier", lvl + 2);
   os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
   closeTag("identifier", lvl + 2);
@@ -350,29 +355,19 @@ void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl)
   os() << std::string(lvl + 4, ' ');
   switch (node->qualifier()) {
     case 0:
-    os() << '0';
+    os() << "none";
     break;
     case 1:
-    os() << '1';
+    os() << "public";
     break;
     case 2:
-    os() << '2';
+    os() << "extern";
     break;
     default:
     break;
   }
   os() << std::endl;
   closeTag("qualifier", lvl + 2);
-
-  openTag("type", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
-  closeTag("type", lvl + 2);
-
-  if (node->literal()) {
-    openTag("literal", lvl + 2);
-    node->literal()->accept(this, lvl + 4);
-    closeTag("literal", lvl + 2);
-  }
 
   openTag("arguments", lvl + 2);
   node->arguments()->accept(this, lvl + 4);
@@ -384,6 +379,11 @@ void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl)
 void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
+
+  openTag("type", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
+  closeTag("type", lvl + 2);
+
   openTag("identifier", lvl + 2);
   os() << std::string(lvl + 4, ' ') << node->identifier() << std::endl;
   closeTag("identifier", lvl + 2);
@@ -392,23 +392,19 @@ void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
   os() << std::string(lvl + 4, ' ');
   switch (node->qualifier()) {
     case 0:
-    os() << '0';
+    os() << "none";
     break;
     case 1:
-    os() << '1';
+    os() << "public";
     break;
     case 2:
-    os() << '2';
+    os() << "extern";
     break;
     default:
     break;
   }
   os() << std::endl;
   closeTag("qualifier", lvl + 2);
-
-  openTag("type", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
-  closeTag("type", lvl + 2);
 
   if (node->literal()) {
     openTag("literal", lvl + 2);
@@ -425,5 +421,4 @@ void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
   closeTag("body", lvl + 2);
 
   closeTag(node, lvl);
-  
 }
