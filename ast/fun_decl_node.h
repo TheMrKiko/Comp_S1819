@@ -18,10 +18,6 @@ namespace m19 {
         cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _arguments(arguments) {
     }
 
-    fun_decl_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, cdk::expression_node *literal, cdk::sequence_node *arguments) :
-        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _literal(literal), _arguments(arguments) {
-    }
-
   public:
     int qualifier() {
       return _qualifier;
@@ -34,10 +30,6 @@ namespace m19 {
     }
     cdk::sequence_node *arguments() {
       return _arguments;
-    }
-
-    cdk::expression_node *literal() {
-      return _literal;
     }
 
     void accept(basic_ast_visitor *sp, int level) {

@@ -247,15 +247,19 @@ void m19::xml_writer::do_index_node(m19::index_node * const node, int lvl) {
 }
 
 void m19::xml_writer::do_block_node(m19::block_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS; // preciso??
+  ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  openTag("declarations", lvl + 2);
-  do_sequence_node(node->declarations(), lvl + 4);
-  closeTag("declarations", lvl + 2);
+  if (node->declarations()) {
+    openTag("declarations", lvl + 2);
+    node->declarations()->accept(this, lvl + 4);
+    closeTag("declarations", lvl + 2);
+  }
 
-  openTag("instructions", lvl + 2);
-  do_sequence_node(node->instructions(), lvl + 4);
-  closeTag("instructions", lvl + 2);
+  if (node->instructions()) {
+    openTag("instructions", lvl + 2);
+    node->instructions()->accept(this, lvl + 4);
+    closeTag("instructions", lvl + 2);
+  }
   closeTag(node, lvl);
 }
 
@@ -281,21 +285,40 @@ void m19::xml_writer::do_fun_final_section_node(m19::fun_final_section_node * co
 void m19::xml_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
+  if (node->condition()) { 
+    openTag("condition", lvl + 2);
+    node->condition()->accept(this, lvl + 4);
+    closeTag("condition", lvl + 2);
+  }
+
   node->block()->accept(this, lvl + 2);
   closeTag(node, lvl);
+
+  openTag("exclusive", lvl + 2);
+  os() << std::string(lvl + 4, ' ') << node->exclusive() << std::endl;
+  closeTag("exclusive", lvl + 2);
 }
 
 void m19::xml_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  openTag("initial", lvl + 2);
-  node->initial_node()->accept(this, lvl + 2);
+  if (node->initial_node()) {
+    openTag("initial", lvl + 2);
+    node->initial_node()->accept(this, lvl + 4);
+    closeTag("initial", lvl + 2);
+  }
 
-  openTag("sections", lvl + 2);
-  node->sections()->accept(this, lvl + 2);
+  if (node->sections()) {
+    openTag("sections", lvl + 2);
+    node->sections()->accept(this, lvl + 4);
+    closeTag("sections", lvl + 2);
+  }
 
-  openTag("final", lvl + 2);
-  node->final_node()->accept(this, lvl + 2);
+  if (node->final_node()) {
+    openTag("final", lvl + 2);
+    node->final_node()->accept(this, lvl + 4);
+    closeTag("final", lvl + 2);
+  }
   closeTag(node, lvl);
 }
 
@@ -370,7 +393,11 @@ void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl)
   closeTag("qualifier", lvl + 2);
 
   openTag("arguments", lvl + 2);
-  node->arguments()->accept(this, lvl + 4);
+  if (node->arguments()) {
+    node->arguments()->accept(this, lvl + 4);
+  } else {
+    os() << std::string(lvl + 4, ' ') << "none" << std::endl;
+  }
   closeTag("arguments", lvl + 2);
 
   closeTag(node, lvl);
@@ -413,7 +440,11 @@ void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
   }
 
   openTag("arguments", lvl + 2);
-  node->arguments()->accept(this, lvl + 4);
+  if (node->arguments()) {
+    node->arguments()->accept(this, lvl + 4);
+  } else {
+    os() << std::string(lvl + 4, ' ') << "none" << std::endl;
+  }
   closeTag("arguments", lvl + 2);
 
   openTag("body", lvl + 2);
