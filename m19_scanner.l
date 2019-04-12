@@ -57,8 +57,6 @@ static std::ostringstream strlit;
 						}
 <X_STRING>.            	*yylval.s += yytext;
 
-\x01
-
 <X_INVALSTRING>\"      	yy_pop_state(); yy_pop_state(); return tSTRING;
 <X_INVALSTRING>\\\"    	;
 <X_INVALSTRING>.       	;

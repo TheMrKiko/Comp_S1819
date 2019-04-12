@@ -30,16 +30,21 @@
 %token <i> tINTEGER
 %token <r> tREAL
 %token <s> tIDENTIFIER tSTRING
-%token tPRINTLN tREAD tPUNCH tCONT tBREAK tINSEC tOUTSEC
+%token tPRINTLN tREAD tPUNCH tCONT tBREAK
 
-%nonassoc tIFEX tVDECX tFDECX '?'
+%nonassoc tIFEX tVDECX '?' tBODY tSECS
+%nonassoc '{' tINSEC tOUTSEC
 
 %right '='
-%left tGE tLE tEQ tNE '>' '<'
-%left tAND tOR
+%left tOR
+%left tAND
+%nonassoc '~'
+%left tEQ tNE
+%left tGE tLE '>' '<'
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc tUNARY ':' '~'
+%nonassoc tUNARY ':'
+%nonassoc '[' '('
 
 %type <i> qali
 %type <s> strs
@@ -72,8 +77,8 @@ var  : type tIDENTIFIER qali %prec tVDECX    { $$ = new m19::var_decl_node(LINE,
      | type tIDENTIFIER qali '=' expr        { $$ = new m19::var_decl_node(LINE, $3, $1, *$2, $5);   }
      ;
 
-func : type tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $5);        }
-     | '!'  tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $5);        }
+func : type tIDENTIFIER qali '(' args ')' %prec tBODY   { $$ = new m19::fun_decl_node(LINE, $1, *$2, $3, $5);        }
+     | '!'  tIDENTIFIER qali '(' args ')' %prec tBODY   { $$ = new m19::fun_decl_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $5);        }
 
      | type tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $7, $5);     }
      | '!'  tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $7, $5);     }
@@ -87,11 +92,11 @@ lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
 
 
 body : ini  secs fin                         { $$ = new m19::fun_body_node(LINE, $1,      $2,      $3);      }
-     | ini  secs                             { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
+     | ini  secs %prec tSECS                 { $$ = new m19::fun_body_node(LINE, $1,      $2,      nullptr); }
      | ini       fin                         { $$ = new m19::fun_body_node(LINE, $1,      nullptr, $2);      }
-     | ini                                   { $$ = new m19::fun_body_node(LINE, $1,      nullptr, nullptr); }
+     | ini  %prec tSECS                      { $$ = new m19::fun_body_node(LINE, $1,      nullptr, nullptr); }
      |      secs fin                         { $$ = new m19::fun_body_node(LINE, nullptr, $1,      $2);      }
-     |      secs                             { $$ = new m19::fun_body_node(LINE, nullptr, $1,      nullptr); }
+     |      secs %prec tSECS                 { $$ = new m19::fun_body_node(LINE, nullptr, $1,      nullptr); }
      |           fin                         { $$ = new m19::fun_body_node(LINE, nullptr, nullptr, $1);      }
      ;
      
@@ -172,7 +177,6 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
 	| strs                                  { $$ = new cdk::string_node(LINE, $1);            }
      | '-' expr %prec tUNARY                 { $$ = new cdk::neg_node(LINE, $2);               }
      | '+' expr %prec tUNARY                 { $$ = new m19::id_node(LINE, $2);                }
-     | '?' lval %prec tUNARY                 { $$ = new m19::ref_node(LINE, $2);               }
      | '~' expr                              { $$ = new cdk::not_node(LINE, $2);               }
      | '@'                                   { $$ = new m19::read_node(LINE);                  }
      | expr tAND expr	                    { $$ = new cdk::and_node(LINE, $1, $3);           } 
@@ -191,7 +195,7 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | '(' expr ')'                          { $$ = $2;                                        } 
      | '[' expr ']'                          { $$ = new m19::alloc_node(LINE, $2);             }
      | lval                                  { $$ = new cdk::rvalue_node(LINE, $1);            }
-     | lval '?'                              { $$ = new m19::ref_node(LINE, $1);               } 
+     | lval '?' %prec tUNARY                 { $$ = new m19::ref_node(LINE, $1);               } 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    }
      | '@' '=' expr                          { $$ = new m19::return_val_node(LINE, $3);        }
      | tIDENTIFIER '(' exps ')'              { $$ = new m19::fun_call_node(LINE, *$1, $3);     }
