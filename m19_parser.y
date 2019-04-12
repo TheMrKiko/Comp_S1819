@@ -156,6 +156,7 @@ stmt : expr ';'                              { $$ = new m19::evaluation_node(LIN
      | '[' expr ']' '?' stmt ':' stmt        { $$ = new m19::if_else_node(LINE, $2, $5, $7);   }
 
      | '[' exps ';' exps ';' exps ']' stmt   { $$ = new m19::for_node(LINE, $2, $4, $6, $8);   }
+     | '[' args ';' exps ';' exps ']' stmt   { $$ = new m19::for_node(LINE, $2, $4, $6, $8);   }
 
      | blck                                  { $$ = $1;                                        }
      ;

@@ -31,7 +31,7 @@ static std::ostringstream strlit;
 "!!"                    return tPRINTLN;
 
 ">@<"                  	return tPUNCH;
-"@<<" 	                return tCONT;
+"@>>" 	                return tCONT;
 ">>@"   	            return tBREAK;
 
 "<<"                   	return tINSEC;
