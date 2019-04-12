@@ -25,8 +25,6 @@
   m19::fun_init_section_node    *init;
   m19::fun_final_section_node   *final;
   m19::block_node               *block;
-
-
 };
 
 %token <i> tINTEGER
@@ -80,7 +78,6 @@ func : type tIDENTIFIER qali '(' args ')'               { $$ = new m19::fun_decl
      | type tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $7, $5);     }
      | '!'  tIDENTIFIER qali '(' args ')'         body  { $$ = new m19::fun_def_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $7, $5);     }
      | type tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, $1, *$2, $3, $9, $8, $5); }
-     | '!'  tIDENTIFIER qali '(' args ')' '=' lit body  { $$ = new m19::fun_def_node(LINE, new basic_type(0, basic_type::TYPE_VOID), *$2, $3, $9, $8, $5); }
      ;
 
 lit  : tINTEGER                              { $$ = new cdk::integer_node(LINE, $1);           }
@@ -196,7 +193,11 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | lval                                  { $$ = new cdk::rvalue_node(LINE, $1);            }
      | lval '?'                              { $$ = new m19::ref_node(LINE, $1);               } 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    }
-     //Falta ver o @=
+     | '@' '=' expr                          { $$ = new m19::return_val_node(LINE, $3);        }
+     | tIDENTIFIER '(' exps ')'              { $$ = new m19::fun_call_node(LINE, *$1, $3);     }
+     | tIDENTIFIER '(' ')'                   { $$ = new m19::fun_call_node(LINE, *$1, nullptr);}
+     | '@' '(' exps ')'                      { $$ = new m19::fun_call_node(LINE, nullptr, $3);     }
+     | '@' '(' ')'                           { $$ = new m19::fun_call_node(LINE, nullptr, nullptr);} 
      ;
 
 lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);         }

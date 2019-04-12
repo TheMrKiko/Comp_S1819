@@ -48,8 +48,16 @@ static std::ostringstream strlit;
 \"                     	yy_push_state(X_STRING); yylval.s = new std::string("");
 <X_STRING>\"           	yy_pop_state(); return tSTRING;
 <X_STRING>\\\"         	*yylval.s += yytext + 1;
+<X_STRING>\\\\			*yylval.s += yytext + 1;
 <X_STRING>\\\0         	yy_push_state(X_INVALSTRING);
+<X_STRING>\\\0[0-9a-f] 	{
+						strlit << '\\' << 'x' << *(yytext + 1);
+						*yylval.s += strlit.str().c_str();
+						strlit.str("");
+						}
 <X_STRING>.            	*yylval.s += yytext;
+
+\x01
 
 <X_INVALSTRING>\"      	yy_pop_state(); yy_pop_state(); return tSTRING;
 <X_INVALSTRING>\\\"    	;
@@ -57,9 +65,17 @@ static std::ostringstream strlit;
 
  /*<X_STRING>\n           yyerror("newline in string");*/
 
-0x[0-9A-Fa-f]+          yylval.i = strtol(yytext, nullptr, 16); return tINTEGER;
+0x[0-9A-Fa-f]+    	{
+						yylval.i = strtoul(yytext, nullptr, 16);
+						if (errno == ERANGE) yyerror("Overflow in int");
+						return tINTEGER;
+					}
 
-[0-9]+\.[0-9]+			yylval.r = strtod(yytext, nullptr); return tREAL;
+[0-9]+\.[0-9]+		{
+						yylval.r = strtod(yytext, nullptr);	
+						if (errno == ERANGE) yyerror("Overflow in real");
+						return tREAL;
+					}
 
 
 [0-9]+					strlit << *yytext; yy_push_state(X_R_INI);
@@ -102,16 +118,18 @@ static std::ostringstream strlit;
 
 <X_R_INI>.|\n 		{
 						yyless(yyleng - 1); yylval.i = strtoul(strlit.str().c_str(), nullptr, 10);
+						if (errno == ERANGE) yyerror("Overflow in int");
 						strlit.str(""); yy_pop_state(); return tINTEGER;
 					}
 
 <X_R_FIN>.|\n		{
 						yyless(yyleng - 1); yylval.r = strtod(strlit.str().c_str(), nullptr);
+						if (errno == ERANGE) yyerror("Overflow in real");
 						strlit.str("");	yy_pop_state(); yy_pop_state(); yy_pop_state(); 
 						return tREAL;
 					}
 
-[-[\]()<>=+*/%;{}#?:.,]	return *yytext;
+[-[\]()<>=+*/%;{}#!?:.,@]	return *yytext;
 
 [ \t\n]+               	; /* ignore whitespace */
 

@@ -6,12 +6,12 @@
 
 namespace m19 {
 
-  class return_val_node: public cdk::basic_node {
+  class return_val_node: public cdk::expression_node {
     cdk::expression_node* _value;
 
   public:
     return_val_node(int lineno, cdk::expression_node* value) :
-        cdk::basic_node(lineno), _value(value) {
+        cdk::expression_node(lineno), _value(value) {
     }
 
   public:
