@@ -40,6 +40,16 @@ namespace m19 {
       closeTag(node->label(), lvl);
     }
 
+    std::string typetostr(basic_type* type) {
+      if (type->name() & basic_type::TYPE_INT) return "int";
+      if (type->name() & basic_type::TYPE_DOUBLE) return "double";
+      if (type->name() & basic_type::TYPE_STRING) return "string";
+      if (type->name() & basic_type::TYPE_POINTER) return "pointer";
+      if (type->name() & basic_type::TYPE_VOID) return "void";
+      if (type->name() & basic_type::TYPE_ERROR) return "error!!!";
+      return "unknown type.";
+    }
+
   protected:
     void do_binary_expression(cdk::binary_expression_node * const node, int lvl);
     void do_unary_expression(cdk::unary_expression_node * const node, int lvl);

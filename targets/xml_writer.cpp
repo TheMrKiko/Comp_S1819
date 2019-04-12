@@ -291,12 +291,17 @@ void m19::xml_writer::do_fun_section_node(m19::fun_section_node * const node, in
     closeTag("condition", lvl + 2);
   }
 
+  openTag("exclusive", lvl + 2);
+  os() << std::string(lvl + 4, ' ');
+  if (node->exclusive()) {
+    os() << "true" << std::endl;
+  } else {
+    os() << "false" << std::endl;
+  }
+  closeTag("exclusive", lvl + 2);
+
   node->block()->accept(this, lvl + 2);
   closeTag(node, lvl);
-
-  openTag("exclusive", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->exclusive() << std::endl;
-  closeTag("exclusive", lvl + 2);
 }
 
 void m19::xml_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
@@ -350,7 +355,7 @@ void m19::xml_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl)
   closeTag("identifier", lvl + 2);
 
   openTag("type", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->varType() << std::endl;
+  os() << std::string(lvl + 4, ' ') << typetostr(node->varType()) << std::endl;
   closeTag("type", lvl + 2);
 
   if (node->initializer()) {
@@ -367,7 +372,7 @@ void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl)
   openTag(node, lvl);
 
   openTag("type", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->type()->name() << std::endl;
+  os() << std::string(lvl + 4, ' ') << typetostr(node->type()) << std::endl;
   closeTag("type", lvl + 2);
 
   openTag("identifier", lvl + 2);
@@ -403,12 +408,13 @@ void m19::xml_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl)
   closeTag(node, lvl);
 }
 
+
 void m19::xml_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
 
   openTag("type", lvl + 2);
-  os() << std::string(lvl + 4, ' ') << node->type() << std::endl;
+  os() << std::string(lvl + 4, ' ') << typetostr(node->type()) << std::endl;
   closeTag("type", lvl + 2);
 
   openTag("identifier", lvl + 2);

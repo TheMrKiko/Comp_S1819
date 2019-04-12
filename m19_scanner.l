@@ -50,13 +50,12 @@ static std::ostringstream strlit;
 <X_STRING>\\\"         	*yylval.s += yytext + 1;
 <X_STRING>\\\\			*yylval.s += yytext + 1;
 <X_STRING>\\\0         	yy_push_state(X_INVALSTRING);
-<X_STRING>\\\0[0-9a-f] 	{
-						strlit << '\\' << 'x' << *(yytext + 1);
-						*yylval.s += strlit.str().c_str();
-						strlit.str("");
-						}
+<X_STRING>\\\[0-9a-fA-F]{1,2} 	{
+									strlit << '\\' << 'x' << *(yytext + 1);
+									*yylval.s += strlit.str().c_str();
+									strlit.str("");
+								}
 <X_STRING>.            	*yylval.s += yytext;
-
 <X_INVALSTRING>\"      	yy_pop_state(); yy_pop_state(); return tSTRING;
 <X_INVALSTRING>\\\"    	;
 <X_INVALSTRING>.       	;
