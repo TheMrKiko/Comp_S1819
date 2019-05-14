@@ -40,6 +40,7 @@ static std::ostringstream strlit;
 [A-Za-z][A-Za-z0-9_]*  	yylval.s = new std::string(yytext); return tIDENTIFIER;
 
 "/*"               	   	yy_push_state(X_COMMENT);
+<X_COMMENT>"/*"         yy_push_state(X_COMMENT);
 <X_COMMENT>"*/"		   	yy_pop_state();
 <X_COMMENT>.		   	;
 

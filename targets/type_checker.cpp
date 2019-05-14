@@ -57,22 +57,40 @@ void m19::type_checker::do_string_node(cdk::string_node * const node, int lvl) {
 
 void m19::type_checker::processUnaryExpression(cdk::unary_expression_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
-  if (node->argument()->type()->name() != basic_type::TYPE_INT) throw std::string("wrong type in argument of unary expression");
+  if (node->argument()->type()->name() != basic_type::TYPE_INT && node->argument()->type()->name() != basic_type::TYPE_DOUBLE) throw std::string("wrong type in argument of unary expression");
 
-  // in Simple, expressions are always int
-  node->type(new basic_type(4, basic_type::TYPE_INT));
+  node->type(new basic_type(node->argument()->type()->size(), node->argument()->type()->name()));
+}
+
+void m19::type_checker::do_id_node(m19::id_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  processUnaryExpression(node, lvl);
 }
 
 void m19::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
+  ASSERT_UNSPEC;
   processUnaryExpression(node, lvl);
 }
 
 void m19::type_checker::do_ref_node(m19::ref_node * const node, int lvl) {
-  //processUnaryExpression(node, lvl); //FIXME ?
+  ASSERT_UNSPEC;
+  node->lvalue()->accept(this, lvl + 2);
+  if (node->lvalue()->type()->name() == basic_type::TYPE_VOID) {
+    throw std::string("wrong type in unary logical expression");
+  } else {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->type()->subtype(new basic_type(node->lvalue()->type()->size(), node->lvalue()->type()->name()));
+  }
 }
 
 void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) {
-  //processUnaryExpression(node, lvl); //FIXME ?
+  ASSERT_UNSPEC;
+  node->argument()->accept(this, lvl + 2);
+  if (node->argument()->type()->name() != basic_type::TYPE_INT) {
+    throw std::string("wrong type in unary logical expression");
+  } else {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -253,10 +271,6 @@ void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lv
 }
 
 void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
-  //FIXME
-}
-
-void m19::type_checker::do_id_node(m19::id_node * const node, int lvl) {
   //FIXME
 }
 
