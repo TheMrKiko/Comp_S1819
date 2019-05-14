@@ -1,4 +1,4 @@
-// $Id: print_node.h,v 1.3 2019/04/10 03:16:33 ist186400 Exp $ -*- c++ -*-
+// $Id: print_node.h,v 1.4 2019/05/14 14:32:25 ist186400 Exp $ -*- c++ -*-
 #ifndef __M19_PRINT_NODE_H__
 #define __M19_PRINT_NODE_H__
 
@@ -21,6 +21,10 @@ namespace m19 {
   public:
     inline cdk::expression_node *argument() {
       return _argument;
+    }
+    
+    inline bool newline() {
+      return _newline;
     }
 
     void accept(basic_ast_visitor *sp, int level) {
