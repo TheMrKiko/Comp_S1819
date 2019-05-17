@@ -198,15 +198,16 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | lval                                  { $$ = new cdk::rvalue_node(LINE, $1);            }
      | lval '?' %prec tUNARY                 { $$ = new m19::ref_node(LINE, $1);               } 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    }
-     | '@' '=' expr                          { $$ = new m19::return_val_node(LINE, $3);        }
+     | '@' '=' expr                          { $$ = new cdk::assignment_node(LINE, "@", $3);    }
      | tIDENTIFIER '(' exps ')'              { $$ = new m19::fun_call_node(LINE, *$1, $3);     }
      | tIDENTIFIER '(' ')'                   { $$ = new m19::fun_call_node(LINE, *$1, nullptr);}
      | '@' '(' exps ')'                      { $$ = new m19::fun_call_node(LINE, nullptr, $3);     }
      | '@' '(' ')'                           { $$ = new m19::fun_call_node(LINE, nullptr, nullptr);} 
      ;
 
-lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);         }
-     | expr '[' expr ']'                     { $$ = new m19::index_node(LINE, $1, $3);         }
+lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);                   }
+     | expr '[' expr ']'                     { $$ = new m19::index_node(LINE, $1, $3);                   }
+     | '@' '[' expr ']'                      { $$ = new m19::index_node(LINE, "@", $3);                  }
      ;
 
 %%

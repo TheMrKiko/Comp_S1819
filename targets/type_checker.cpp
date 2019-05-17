@@ -75,12 +75,12 @@ void m19::type_checker::do_neg_node(cdk::neg_node * const node, int lvl) {
 void m19::type_checker::do_ref_node(m19::ref_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->lvalue()->accept(this, lvl + 2);
-  if (node->lvalue()->type()->name() == basic_type::TYPE_VOID) {
+  /*if (node->lvalue()->type()->name() == basic_type::TYPE_VOID) {
     throw std::string("wrong type in unary logical expression");
-  } else {
+  } else {*/
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
     node->type()->subtype(new basic_type(node->lvalue()->type()->size(), node->lvalue()->type()->name()));
-  }
+  // }
 }
 
 void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) {
@@ -95,50 +95,224 @@ void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void m19::type_checker::processBinaryExpression(cdk::binary_expression_node * const node, int lvl) {
+void m19::type_checker::do_add_node(cdk::add_node * const node, int lvl) {
+    ASSERT_UNSPEC;
+  node->left()->accept(this, lvl + 2);
+  node->right()->accept(this, lvl + 2);
+
+  if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    node->left()->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    node->right()->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+
+  }
+}
+
+void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
   ASSERT_UNSPEC;
   node->left()->accept(this, lvl + 2);
-  if (node->left()->type()->name() != basic_type::TYPE_INT) throw std::string("wrong type in left argument of binary expression");
-
   node->right()->accept(this, lvl + 2);
-  if (node->right()->type()->name() != basic_type::TYPE_INT) throw std::string("wrong type in right argument of binary expression");
 
-  // in Simple, expressions are always int
-  node->type(new basic_type(4, basic_type::TYPE_INT));
+  if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_POINTER &&
+    node->left()->type()->subtype()->name() == node->right()->type()->subtype()->name()) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    node->left()->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+    node->right()->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+
+  }
 }
 
-void m19::type_checker::do_add_node(cdk::add_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+void m19::type_checker::process_ID_Expression(cdk::binary_expression_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->left()->accept(this, lvl + 2);
+  node->right()->accept(this, lvl + 2);
+
+  if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
+    node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
+
+  } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_UNSPEC) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+    node->left()->type(new basic_type(4, basic_type::TYPE_INT));
+    node->right()->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+
+  }
 }
-void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
-}
+
+void m19::type_checker::process_I_Expression(cdk::binary_expression_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->left()->accept(this, lvl + 2);
+  node->right()->accept(this, lvl + 2);
+
+  if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_INT) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+
+  }
+}  
+
+void m19::type_checker::process_ID_ScalarExpression(cdk::binary_expression_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->left()->accept(this, lvl + 2);
+  node->right()->accept(this, lvl + 2);
+
+  if ((node->left()->type()->name() == basic_type::TYPE_INT || node->left()->type()->name() == basic_type::TYPE_DOUBLE) && 
+      (node->right()->type()->name() == basic_type::TYPE_INT || node->right()->type()->name() == basic_type::TYPE_DOUBLE)) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+  }
+} 
+
+void m19::type_checker::process_IDP_LogicalExpression(cdk::binary_expression_node * const node, int lvl) {
+  ASSERT_UNSPEC;
+  node->left()->accept(this, lvl + 2);
+  node->right()->accept(this, lvl + 2);
+
+  if ((node->left()->type()->name() == basic_type::TYPE_INT || node->left()->type()->name() == basic_type::TYPE_DOUBLE) && 
+      (node->right()->type()->name() == basic_type::TYPE_INT || node->right()->type()->name() == basic_type::TYPE_DOUBLE)) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_POINTER ||
+             node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT ||
+             node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+    node->type(new basic_type(4, basic_type::TYPE_INT));
+  } else {
+    throw std::string("wrong type in one of arguments of binary expression");
+  }
+} 
+
 void m19::type_checker::do_mul_node(cdk::mul_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_Expression(node, lvl);
 }
 void m19::type_checker::do_div_node(cdk::div_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_Expression(node, lvl);;
 }
 void m19::type_checker::do_mod_node(cdk::mod_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_I_Expression(node, lvl);
 }
 void m19::type_checker::do_lt_node(cdk::lt_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_ScalarExpression(node, lvl);
 }
 void m19::type_checker::do_le_node(cdk::le_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_ScalarExpression(node, lvl);
 }
 void m19::type_checker::do_ge_node(cdk::ge_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_ScalarExpression(node, lvl);
 }
 void m19::type_checker::do_gt_node(cdk::gt_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_ID_ScalarExpression(node, lvl);
 }
 void m19::type_checker::do_ne_node(cdk::ne_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_IDP_LogicalExpression(node, lvl);
 }
 void m19::type_checker::do_eq_node(cdk::eq_node * const node, int lvl) {
-  processBinaryExpression(node, lvl);
+  process_IDP_LogicalExpression(node, lvl);
 }
 
 //---------------------------------------------------------------------------
