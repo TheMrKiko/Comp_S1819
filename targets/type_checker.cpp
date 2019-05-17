@@ -79,8 +79,10 @@ void m19::type_checker::do_ref_node(m19::ref_node * const node, int lvl) {
     throw std::string("wrong type in unary logical expression");
   } else {*/
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
-    node->type()->subtype(new basic_type(node->lvalue()->type()->size(), node->lvalue()->type()->name()));
+
+    node->type()->_subtype = new basic_type(node->lvalue()->type()->size(), node->lvalue()->type()->name());
   // }
+
 }
 
 void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) {
@@ -275,12 +277,12 @@ void m19::type_checker::process_IDP_LogicalExpression(cdk::binary_expression_nod
   node->left()->accept(this, lvl + 2);
   node->right()->accept(this, lvl + 2);
 
-  if ((node->left()->type()->name() == basic_type::TYPE_INT || node->left()->type()->name() == basic_type::TYPE_DOUBLE) && 
+  if ((node->left()->type()->name() == basic_type::TYPE_INT  || node->left()->type()->name() == basic_type::TYPE_DOUBLE) && 
       (node->right()->type()->name() == basic_type::TYPE_INT || node->right()->type()->name() == basic_type::TYPE_DOUBLE)) {
     node->type(new basic_type(4, basic_type::TYPE_INT));
-  } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_POINTER ||
-             node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT ||
-             node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
+  } else if ((node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_POINTER) ||
+             (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) ||
+             (node->left()->type()->name() == basic_type::TYPE_INT     && node->right()->type()->name() == basic_type::TYPE_POINTER)) {
     node->type(new basic_type(4, basic_type::TYPE_INT));
   } else {
     throw std::string("wrong type in one of arguments of binary expression");

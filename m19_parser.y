@@ -43,7 +43,7 @@
 %left tGE tLE '>' '<'
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc tUNARY ':'
+%nonassoc tUNARY ':' tREAD
 %nonassoc '[' '('
 
 %type <i> qali
@@ -179,7 +179,7 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | '-' expr %prec tUNARY                 { $$ = new cdk::neg_node(LINE, $2);               }
      | '+' expr %prec tUNARY                 { $$ = new m19::id_node(LINE, $2);                }
      | '~' expr                              { $$ = new cdk::not_node(LINE, $2);               }
-     | '@'                                   { $$ = new m19::read_node(LINE);                  }
+     | '@' %prec tREAD                       { $$ = new m19::read_node(LINE);                  }
      | expr tAND expr	                    { $$ = new cdk::and_node(LINE, $1, $3);           } 
      | expr tOR expr	                    { $$ = new cdk::or_node(LINE, $1, $3);            } 
      | expr '+' expr	                    { $$ = new cdk::add_node(LINE, $1, $3);           } 
@@ -198,7 +198,7 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | lval                                  { $$ = new cdk::rvalue_node(LINE, $1);            }
      | lval '?' %prec tUNARY                 { $$ = new m19::ref_node(LINE, $1);               } 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    }
-     | '@' '=' expr                          { $$ = new cdk::assignment_node(LINE, "@", $3);    }
+     | '@' '=' expr                          { $$ = new cdk::assignment_node(LINE, new cdk::variable_node(LINE, "@"), $3);}
      | tIDENTIFIER '(' exps ')'              { $$ = new m19::fun_call_node(LINE, *$1, $3);     }
      | tIDENTIFIER '(' ')'                   { $$ = new m19::fun_call_node(LINE, *$1, nullptr);}
      | '@' '(' exps ')'                      { $$ = new m19::fun_call_node(LINE, nullptr, $3);     }
@@ -207,7 +207,7 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
 
 lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);                   }
      | expr '[' expr ']'                     { $$ = new m19::index_node(LINE, $1, $3);                   }
-     | '@' '[' expr ']'                      { $$ = new m19::index_node(LINE, "@", $3);                  }
+     | '@' '[' expr ']'                      { $$ = new m19::index_node(LINE, (cdk::expression_node*) new cdk::variable_node(LINE, "@"), $3);}
      ;
 
 %%
