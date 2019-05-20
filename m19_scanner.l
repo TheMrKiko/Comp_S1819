@@ -127,7 +127,7 @@ static std::ostringstream strlit;
 						return tREAL;
 					}
 
-[-[\]()<>=+*/%;{}#!?:.,@]	return *yytext;
+[-[\]()<>=+*/%;{}$#!?:.,@]	return *yytext;
 
 [ \t\n]+               	; /* ignore whitespace */
 

@@ -9,7 +9,8 @@
 //---------------------------------------------------------------------------
 
 void m19::type_checker::do_sequence_node(cdk::sequence_node * const node, int lvl) {
-  // EMPTY
+  for (size_t i = 0; i < node->size(); i++)
+    node->node(i)->accept(this, lvl);
 } 
 
 void m19::type_checker::do_continue_node(m19::continue_node * const node, int lvl) {
@@ -342,7 +343,7 @@ void m19::type_checker::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
 }
 
 void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, int lvl) {
-  ASSERT_UNSPEC;
+/*  ASSERT_UNSPEC;
 
   try {
     node->lvalue()->accept(this, lvl);
@@ -362,6 +363,7 @@ void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, in
 
   // in Simple, expressions are always int
   node->type(new basic_type(4, basic_type::TYPE_INT));
+  */
 }
 
 //---------------------------------------------------------------------------
@@ -438,8 +440,48 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
   //FIXME
 }
 
-void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
-  //FIXME
+void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lvl) { //from gr8
+  if (node->initializer() != nullptr) { 
+    node->initializer()->accept(this, lvl + 2);
+
+    basic_type *vartype = node->varType();
+    basic_type *initype = node->initializer()->type(); 
+
+    while (vartype->subtype() != nullptr && initype->subtype() != nullptr) {
+      vartype = vartype->subtype();
+      initype = initype->subtype();
+    }
+
+    if (vartype->name() == basic_type::TYPE_INT) {
+      if (initype->name() != basic_type::TYPE_INT) throw std::string(
+          "wrong type for initializer (integer expected).");
+    } else if (vartype->name() == basic_type::TYPE_DOUBLE) {
+      if (initype->name() != basic_type::TYPE_INT
+          && initype->name() != basic_type::TYPE_DOUBLE) throw std::string(
+          "wrong type for initializer (integer or double expected).");
+    } else if (vartype->name() == basic_type::TYPE_STRING) {
+      if (initype->name() != basic_type::TYPE_STRING) throw std::string(
+          "wrong type for initializer (string expected).");
+    } else if (vartype->name() == basic_type::TYPE_POINTER) {
+      if (initype->name() != basic_type::TYPE_POINTER) throw std::string(
+          "wrong type for initializer (pointer expected).");
+    } else {
+      throw std::string("unknown type for initializer.");
+    }
+  }
+
+  const std::string &id = node->identifier();
+  std::shared_ptr<m19::symbol> symbol = std::make_shared < m19::symbol > (
+  node->qualifier(), // qualifiers: public, forward, "private" (i.e., none)
+  node->varType(), // type (type id + type size)
+  id, // identifier
+  (bool)node->initializer(), // initialized?
+  false); // is it a function?
+  if (_symtab.insert(id, symbol)) {
+    _parent->set_new_symbol(symbol);  // advise parent that a symbol has been inserted
+  } else {
+    throw std::string("variable '" + id + "' redeclared");
+  }
 }
 
 void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {

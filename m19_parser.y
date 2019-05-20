@@ -200,9 +200,9 @@ expr : tINTEGER                              { $$ = new cdk::integer_node(LINE, 
      | lval '=' expr                         { $$ = new cdk::assignment_node(LINE, $1, $3);    }
      | '@' '=' expr                          { $$ = new cdk::assignment_node(LINE, new cdk::variable_node(LINE, "@"), $3);}
      | tIDENTIFIER '(' exps ')'              { $$ = new m19::fun_call_node(LINE, *$1, $3);     }
-     | tIDENTIFIER '(' ')'                   { $$ = new m19::fun_call_node(LINE, *$1, nullptr);}
-     | '@' '(' exps ')'                      { $$ = new m19::fun_call_node(LINE, nullptr, $3);     }
-     | '@' '(' ')'                           { $$ = new m19::fun_call_node(LINE, nullptr, nullptr);} 
+     | tIDENTIFIER '(' ')'                   { $$ = new m19::fun_call_node(LINE, *$1);}
+     | '@' '(' exps ')'                      { $$ = new m19::fun_call_node(LINE, "@", $3);     }
+     | '@' '(' ')'                           { $$ = new m19::fun_call_node(LINE, "@");} 
      ;
 
 lval : tIDENTIFIER                           { $$ = new cdk::variable_node(LINE, *$1);                   }
