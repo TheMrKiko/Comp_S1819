@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.2 2019/05/17 19:19:41 ist186400 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.3 2019/05/21 14:18:12 ist186400 Exp $ -*- c++ -*-
 #ifndef __M19_SEMANTICS_TYPE_CHECKER_H__
 #define __M19_SEMANTICS_TYPE_CHECKER_H__
 
@@ -36,6 +36,7 @@ namespace m19 {
     void process_I_Expression(cdk::binary_expression_node * const node, int lvl);
     void process_ID_ScalarExpression(cdk::binary_expression_node * const node, int lvl);
     void process_IDP_LogicalExpression(cdk::binary_expression_node * const node, int lvl);
+    void do_BooleanLogicalExpression(cdk::binary_expression_node * const node, int lvl);
     template<typename T>
     void process_literal(cdk::literal_node<T> * const node, int lvl) {
     }
