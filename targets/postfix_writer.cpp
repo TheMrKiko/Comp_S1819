@@ -2,6 +2,7 @@
 #include <sstream>
 #include "targets/type_checker.h"
 #include "targets/postfix_writer.h"
+#include "targets/frame_size_calculator.h"
 #include "ast/all.h"  // all.h is automatically generated
 
 //---------------------------------------------------------------------------

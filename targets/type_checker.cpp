@@ -194,9 +194,6 @@ void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) {
   } else if (node->left()->type()->name() == basic_type::TYPE_DOUBLE && node->right()->type()->name() == basic_type::TYPE_DOUBLE) {
     node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
 
-  } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
-    node->type(new basic_type(4, basic_type::TYPE_POINTER));
-
   } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) {
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
 
