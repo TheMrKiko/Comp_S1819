@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.3 2019/05/21 14:18:12 ist186400 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.4 2019/05/23 08:32:14 ist186400 Exp $ -*- c++ -*-
 #ifndef __M19_SEMANTICS_TYPE_CHECKER_H__
 #define __M19_SEMANTICS_TYPE_CHECKER_H__
 
@@ -11,13 +11,17 @@
 
 namespace m19 {
 
-  /**
-   * Print nodes as XML elements to the output stream.
-   */
   class type_checker: public basic_ast_visitor {
     cdk::symbol_table<m19::symbol> &_symtab;
 
     basic_ast_visitor *_parent;
+
+    // semantics analysis
+    bool _inInitSection = false;
+    bool _inFunArgs = false;
+
+    std::shared_ptr<m19::symbol> _function;
+
 
   public:
     type_checker(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<m19::symbol> &symtab, basic_ast_visitor *parent) :

@@ -18,10 +18,10 @@ namespace m19 {
     cdk::symbol_table<m19::symbol> &_symtab;
 
     // semantic analysis
-    //bool _errors, _inFunction, _inFunctionName, _inFunctionArgs, _inFunctionBody;
-    //bool _inForInit;
+    bool /*_errors, _inFunction, _inFunctionName, _inFunctionArgs,*/ _inFunctionBody;
+    bool _inForInit;
     //bool _returnSeen; // when building a function
-    std::stack<int> _forIni, _forStep, _forEnd; // for break/repeat
+    std::stack<int> _forIni, _forStep, _forEnd; // for break/continue
 
     // code generation
     cdk::basic_postfix_emitter &_pf;

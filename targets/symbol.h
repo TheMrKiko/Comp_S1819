@@ -2,6 +2,7 @@
 #define __M19_SEMANTICS_SYMBOL_H__
 
 #include <string>
+#include <list>
 #include <cdk/basic_type.h>
 
 namespace m19 {
@@ -15,6 +16,7 @@ namespace m19 {
     bool _initialized;
     int _offset = 0; // 0 (zero) means global variable/function
     bool _function; // false for variables
+    std::list<std::shared_ptr<symbol>> _args; //arguments of function
     bool _forward = false;
 
   public:
@@ -74,6 +76,10 @@ namespace m19 {
 
     bool forward() const {
       return _forward;
+    }
+
+    std::list<std::shared_ptr<symbol>> *args() {
+      return &_args;
     }
   };
 
