@@ -94,18 +94,16 @@ void m19::postfix_writer::do_string_node(cdk::string_node * const node, int lvl)
 
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) {
+void m19::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value
   _pf.NEG(); // 2-complement
 }
 
-void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) {
-  /*ASSERT_SAFE_EXPRESSIONS;
-  node->argument()->accept(this, lvl); // determine the value
-  _pf.NEG(); // 2-complement*/ //FIXME
+void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
+  node->lvalue()->accept(this, lvl); // it's enough!
 }
-
 
 void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
   /*ASSERT_SAFE_EXPRESSIONS;
@@ -308,7 +306,10 @@ void m19::postfix_writer::do_variable_node(cdk::variable_node * const node, int 
   ASSERT_SAFE_EXPRESSIONS;
   const std::string &id = node->name();
   std::shared_ptr<m19::symbol> symbol = _symtab.find(id);
-  if (symbol->global()) {
+  if (id == "@") {
+    _pf.LOCAL(-4);
+  }
+  else if (symbol->global()) {
     _pf.ADDR(symbol->name());
   }
   else {
@@ -329,20 +330,22 @@ void m19::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl)
 
 void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) { //not done @ pelo menos
   ASSERT_SAFE_EXPRESSIONS;
-  node->rvalue()->accept(this, lvl); // determine the new value
-  _pf.DUP32();
-  if (new_symbol() == nullptr) {
-    node->lvalue()->accept(this, lvl); // where to store the value
+
+  node->rvalue()->accept(this, lvl + 2);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE) {
+    if (node->rvalue()->type()->name() == basic_type::TYPE_INT)
+      _pf.I2D();
+    _pf.DUP64();
   } else {
-    _pf.DATA(); // variables are all global and live in DATA
-    _pf.ALIGN(); // make sure we are aligned
-    _pf.LABEL(new_symbol()->name()); // name variable location
-    reset_new_symbol();
-    _pf.SINT(0); // initialize it to 0 (zero)
-    _pf.TEXT(); // return to the TEXT segment
-    node->lvalue()->accept(this, lvl);  //DAVID: bah!
+    _pf.DUP32();
   }
-  _pf.STINT(); // store the value at address
+
+  node->lvalue()->accept(this, lvl);
+  if (node->type()->name() == basic_type::TYPE_DOUBLE) {
+    _pf.STDOUBLE();
+  } else {
+    _pf.STINT();
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -539,6 +542,7 @@ void m19::postfix_writer::do_fun_section_node(m19::fun_section_node * const node
 }
 
 void m19::postfix_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
+  //ASSERT_SAFE_EXPRESSIONS;  
   _finalSectionLbl = ++_lbl;
   _functionEndLbl = ++_lbl;
   if (node->initial_section()) node->initial_section()->accept(this, lvl);
@@ -603,7 +607,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
   } 
   
   else {
-    if (true) { //APAGAR ISTO
+    if (_function) { //necessario?
       if (node->initializer() == nullptr) {
         _pf.BSS();
         _pf.ALIGN();
@@ -664,7 +668,7 @@ void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int 
 }
 
 void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS ;
+  ASSERT_SAFE_EXPRESSIONS;
   
   if (_inFunctionBody || _inFunctionArgs) {
     error(node->lineno(), "cannot define function in body or in arguments");
@@ -672,8 +676,8 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   }
 
   // remember symbol so that args and body know
-  std::shared_ptr<m19::symbol> function = new_symbol();
-  _functions_to_declare.erase(function->name());  // just in case
+  _function = new_symbol();
+  _functions_to_declare.erase(_function->name());  // just in case
   reset_new_symbol();
 
   _offset = 8; // prepare for arguments (4: remember to account for return address)
@@ -690,8 +694,8 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
 
   _pf.TEXT();
   _pf.ALIGN();
-  if (node->qualifier() == 1) _pf.GLOBAL(function->name(), _pf.FUNC());
-  _pf.LABEL(function->name());
+  if (node->qualifier() == 1) _pf.GLOBAL(_function->name(), _pf.FUNC());
+  _pf.LABEL(_function->name());
 
   // compute stack size to be reserved for local variables
   frame_size_calculator lsc(_compiler, _symtab);
@@ -701,9 +705,9 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   // the following flag is a slight hack: it won't work with nested functions
   _inFunctionBody = true;
   // prepare for local variables but remember the return value (first below fp)
-  _offset = -function->type()->size();
+  _offset = -_function->type()->size();
   os() << "        ;; before body " << std::endl;
-  node->body()->accept(this, lvl + 2); // block has its own scope
+  node->body()->accept(this, lvl + 2);
   os() << "        ;; after body " << std::endl;
   _inFunctionBody = false;
   _symtab.pop(); // scope of arguments

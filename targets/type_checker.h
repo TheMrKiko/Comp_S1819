@@ -1,4 +1,4 @@
-// $Id: type_checker.h,v 1.4 2019/05/23 08:32:14 ist186400 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.5 2019/05/23 21:09:30 ist186400 Exp $ -*- c++ -*-
 #ifndef __M19_SEMANTICS_TYPE_CHECKER_H__
 #define __M19_SEMANTICS_TYPE_CHECKER_H__
 
@@ -13,19 +13,18 @@ namespace m19 {
 
   class type_checker: public basic_ast_visitor {
     cdk::symbol_table<m19::symbol> &_symtab;
-
+    std::shared_ptr<m19::symbol> _function;
     basic_ast_visitor *_parent;
 
     // semantics analysis
     bool _inInitSection = false;
     bool _inFunArgs = false;
 
-    std::shared_ptr<m19::symbol> _function;
 
 
   public:
-    type_checker(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<m19::symbol> &symtab, basic_ast_visitor *parent) :
-        basic_ast_visitor(compiler), _symtab(symtab), _parent(parent) {
+    type_checker(std::shared_ptr<cdk::compiler> compiler, cdk::symbol_table<m19::symbol> &symtab, std::shared_ptr<m19::symbol> func, basic_ast_visitor *parent) :
+        basic_ast_visitor(compiler), _symtab(symtab), _function(func), _parent(parent) {
     }
 
   public:
@@ -61,9 +60,9 @@ namespace m19 {
 //     HELPER MACRO FOR TYPE CHECKING
 //---------------------------------------------------------------------------
 
-#define CHECK_TYPES(compiler, symtab, node) { \
+#define CHECK_TYPES(compiler, symtab, function, node) { \
   try { \
-    m19::type_checker checker(compiler, symtab, this); \
+    m19::type_checker checker(compiler, symtab, function, this); \
     (node)->accept(&checker, 0); \
   } \
   catch (const std::string &problem) { \
@@ -72,6 +71,6 @@ namespace m19 {
   } \
 }
 
-#define ASSERT_SAFE_EXPRESSIONS CHECK_TYPES(_compiler, _symtab, node)
+#define ASSERT_SAFE_EXPRESSIONS CHECK_TYPES(_compiler, _symtab, _function, node)
 
 #endif

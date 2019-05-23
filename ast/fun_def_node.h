@@ -19,7 +19,7 @@ namespace m19 {
 
   public:
     fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::fun_body_node *body, cdk::sequence_node *arguments) :
-        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _body(body), _arguments(arguments) {
+        cdk::basic_node(lineno), _type(type), _identifier(identifier), _qualifier(qualifier), _body(body), _literal(nullptr), _arguments(arguments) {
     }
 
     fun_def_node(int lineno, basic_type *type, const std::string &identifier, int qualifier, m19::fun_body_node *body, cdk::expression_node *literal, cdk::sequence_node *arguments) :

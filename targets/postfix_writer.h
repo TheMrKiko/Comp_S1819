@@ -17,7 +17,7 @@ namespace m19 {
   //!
   class postfix_writer: public basic_ast_visitor {
     cdk::symbol_table<m19::symbol> &_symtab;
-
+    std::shared_ptr<m19::symbol> _function;
     std::set<std::string> _functions_to_declare;
 
     // semantic analysis
