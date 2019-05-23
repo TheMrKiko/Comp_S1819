@@ -115,6 +115,7 @@ void m19::type_checker::do_alloc_node(m19::alloc_node * const node, int lvl) { /
     throw std::string("wrong type in unary logical expression");
   } else {
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->type()->_subtype = new basic_type(0, basic_type::TYPE_VOID);
   }
 }
 
@@ -178,7 +179,7 @@ void m19::type_checker::do_add_node(cdk::add_node * const node, int lvl) { //DON
   }
 }
 
-void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) { //DONE
+void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) { //DONE p - p doesnt check all the way
   ASSERT_UNSPEC;
   node->left()->accept(this, lvl + 2);
   node->right()->accept(this, lvl + 2);
@@ -347,7 +348,10 @@ void m19::type_checker::do_variable_node(cdk::variable_node * const node, int lv
   if (symbol != nullptr) {
     node->type(symbol->type());
   } else if (node->name() == "@") {
-    node->type(_function->type());
+    if (_function) 
+      node->type(_function->type());
+    else
+      throw std::string("wrong use of @ (not in function)");      
   } else {
     throw std::string("undeclared variable '" + id + "'");
   }
@@ -359,7 +363,7 @@ void m19::type_checker::do_rvalue_node(cdk::rvalue_node * const node, int lvl) {
   node->type(node->lvalue()->type());
 }
 
-void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, int lvl) { //DONE
+void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, int lvl) { //DONE basically
   ASSERT_UNSPEC;
   node->lvalue()->accept(this, lvl + 2);
   node->rvalue()->accept(this, lvl + 2);
@@ -392,9 +396,9 @@ void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, in
   else if (node->lvalue()->type()->name() == basic_type::TYPE_STRING) {
     if (node->rvalue()->type()->name() == basic_type::TYPE_STRING) {
       node->type(new basic_type(4, basic_type::TYPE_STRING));
-    } else if (node->rvalue()->type()->name() == basic_type::TYPE_UNSPEC) {
+    /*} else if (node->rvalue()->type()->name() == basic_type::TYPE_UNSPEC) { //NAO!?
       node->type(new basic_type(4, basic_type::TYPE_STRING));
-      node->rvalue()->type(new basic_type(4, basic_type::TYPE_STRING));
+      node->rvalue()->type(new basic_type(4, basic_type::TYPE_STRING));*/
     } else
       throw std::string("wrong assignment to string");
   } 
@@ -410,14 +414,26 @@ void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, in
       throw std::string("wrong types in assignment");
     }
 
-    //Falta subtipos para alloc
+    //FIXME tipos não vão fundo
 
-    if (node->rvalue()->type()->name() == basic_type::TYPE_POINTER) {
+    if (node->rvalue()->type()->name() == basic_type::TYPE_POINTER &&
+        node->lvalue()->type()->subtype()->name() == node->rvalue()->type()->subtype()->name()) {
       node->type(new basic_type(4, basic_type::TYPE_POINTER));
+      node->type()->_subtype = new basic_type(node->lvalue()->type()->subtype()->size(), 
+                                              node->lvalue()->type()->subtype()->name());
+    } else if (node->rvalue()->type()->name() == basic_type::TYPE_POINTER &&
+        node->rvalue()->type()->subtype()->name() == basic_type::TYPE_VOID) {
+      node->type(new basic_type(4, basic_type::TYPE_POINTER));
+      node->type()->_subtype = new basic_type(node->lvalue()->type()->subtype()->size(), 
+                                              node->lvalue()->type()->subtype()->name());
+      node->rvalue()->type()->_subtype = new basic_type(node->lvalue()->type()->subtype()->size(), 
+                                                        node->lvalue()->type()->subtype()->name());
     } else if (node->rvalue()->type()->name() == basic_type::TYPE_INT) {
       lit = dynamic_cast<cdk::integer_node*>(node->rvalue());
       if (lit != nullptr && lit->value() == 0) {
         node->type(new basic_type(4, basic_type::TYPE_POINTER));
+        node->type()->_subtype = new basic_type(node->lvalue()->type()->subtype()->size(), 
+                                                node->lvalue()->type()->subtype()->name());
       } else
         throw std::string("wrong assignment to pointer");
     } else if (node->rvalue()->type()->name() == basic_type::TYPE_UNSPEC) { //necessary?
@@ -498,7 +514,7 @@ void m19::type_checker::do_block_node(m19::block_node * const node, int lvl) { /
 }
 
 void m19::type_checker::do_return_node(m19::return_node * const node, int lvl) { //DONE
-  //EMPTY
+  if (!_function) throw std::string("return outside of function");
 }
 
 void m19::type_checker::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) { //DONE

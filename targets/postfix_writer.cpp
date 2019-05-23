@@ -28,32 +28,26 @@ void m19::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
 
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int lvl) {
+void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int lvl) { //DONE
   //ASSERT_SAFE_EXPRESSIONS;  ?
   for (size_t i = 0; i < node->size(); i++) {
     node->node(i)->accept(this, lvl);
   }
 }
 
-void m19::postfix_writer::do_continue_node(m19::continue_node * const node, int lvl) {
+void m19::postfix_writer::do_continue_node(m19::continue_node * const node, int lvl) { //DONE
   if (_forIni.size() != 0) {
     _pf.JMP(mklbl(_forStep.top())); // jump to next cycle
   } else
     error(node->lineno(), "'continue' outside 'for'");
 }
 
-void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) {
+void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) { //DONE
   if (_forIni.size() != 0) {
     _pf.JMP(mklbl(_forEnd.top())); // jump to for end
   } else
     error(node->lineno(), "'break' outside 'for'");
 }
-
-/*void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
-  for (size_t i = 0; i < node->size(); i++) {
-    node->node(i)->accept(this, lvl);
-  }
-}*/
 
 //---------------------------------------------------------------------------
 
@@ -100,15 +94,24 @@ void m19::postfix_writer::do_neg_node(cdk::neg_node * const node, int lvl) { //D
   _pf.NEG(); // 2-complement
 }
 
+void m19::postfix_writer::do_id_node(m19::id_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl);
+  //do nothing
+}
+
 void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   node->lvalue()->accept(this, lvl); // it's enough!
 }
 
 void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
-  /*ASSERT_SAFE_EXPRESSIONS;
-  node->argument()->accept(this, lvl); // determine the value
-  _pf.NEG(); // 2-complement*/ //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  node->argument()->accept(this, lvl);
+  _pf.INT(node->type()->subtype()->size());
+  _pf.MUL();
+  _pf.ALLOC(); // allocate
+  _pf.SP();
 }
 
 //---------------------------------------------------------------------------
@@ -328,7 +331,7 @@ void m19::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl)
   }
 }
 
-void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) { //not done @ pelo menos
+void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
 
   node->rvalue()->accept(this, lvl + 2);
@@ -380,25 +383,30 @@ void m19::postfix_writer::do_program_node(m19::program_node * const node, int lv
 */
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
+void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, int lvl) {  //DONE
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value
-  if (node->argument()->type()->name() == basic_type::TYPE_INT) {
-    _pf.TRASH(4); // delete the evaluated value
-  } else if (node->argument()->type()->name() == basic_type::TYPE_STRING) {
-    _pf.TRASH(4); // delete the evaluated value's address
+  if (node->argument()->type()->name() == basic_type::TYPE_DOUBLE) {
+    _pf.TRASH(8);
+  } else if (node->argument()->type()->name() == basic_type::TYPE_INT
+          || node->argument()->type()->name() == basic_type::TYPE_POINTER
+          || node->argument()->type()->name() == basic_type::TYPE_STRING) {
+    _pf.TRASH(4);
   } else {
     std::cerr << "ERROR: CANNOT HAPPEN!" << std::endl;
     exit(1);
   }
 }
 
-void m19::postfix_writer::do_print_node(m19::print_node * const node, int lvl) {
+void m19::postfix_writer::do_print_node(m19::print_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value to print
   if (node->argument()->type()->name() == basic_type::TYPE_INT) {
     _pf.CALL("printi");
     _pf.TRASH(4); // delete the printed value
+  } else if (node->argument()->type()->name() == basic_type::TYPE_DOUBLE) {
+    _pf.CALL("printd");
+    _pf.TRASH(4); // delete the printed value's address
   } else if (node->argument()->type()->name() == basic_type::TYPE_STRING) {
     _pf.CALL("prints");
     _pf.TRASH(4); // delete the printed value's address
@@ -406,17 +414,26 @@ void m19::postfix_writer::do_print_node(m19::print_node * const node, int lvl) {
     std::cerr << "ERROR: CANNOT HAPPEN!" << std::endl;
     exit(1);
   }
-  _pf.CALL("println"); // print a newline
+  if (node->newline()) _pf.CALL("println"); // print a newline
 }
 
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_read_node(m19::read_node * const node, int lvl) {
-  /*ASSERT_SAFE_EXPRESSIONS;
-  _pf.CALL("readi");
-  _pf.LDFVAL32();
-  node->argument()->accept(this, lvl);
-  _pf.STINT();*/
+void m19::postfix_writer::do_read_node(m19::read_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
+
+  if (node->type()->name() == basic_type::TYPE_INT) {
+    _functions_to_declare.insert("readd"); //TAKE THIS OUT ?
+    _pf.CALL("readd");
+    _pf.LDFVAL64();
+  } else if (node->type()->name() == basic_type::TYPE_INT) {
+    _functions_to_declare.insert("readi"); //THIS TOO
+    _pf.CALL("readi");
+    _pf.LDFVAL32();
+  } else {
+    std::cerr << "FATAL: " << node->lineno() << ": cannot read type" << std::endl;
+    return;
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -492,8 +509,13 @@ void m19::postfix_writer::do_if_else_node(m19::if_else_node * const node, int lv
 
 //---------------------------------------------------------------------------
 
-void m19::postfix_writer::do_index_node(m19::index_node * const node, int lvl) {
-  //FIXME
+void m19::postfix_writer::do_index_node(m19::index_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
+  node->base()->accept(this, lvl);
+  node->index()->accept(this, lvl);
+  _pf.INT(node->type()->size());
+  _pf.MUL();
+  _pf.ADD();
 }
 
 void m19::postfix_writer::do_block_node(m19::block_node * const node, int lvl) { //DONE probably
@@ -506,7 +528,8 @@ void m19::postfix_writer::do_block_node(m19::block_node * const node, int lvl) {
   if (!inInitSection) _symtab.pop();  
 }
 
-void m19::postfix_writer::do_return_node(m19::return_node * const node, int lvl) {
+void m19::postfix_writer::do_return_node(m19::return_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;  
   if (!_inFinalSection) {
     _pf.JMP(mklbl(_finalSectionLbl));
   } else {
@@ -514,19 +537,19 @@ void m19::postfix_writer::do_return_node(m19::return_node * const node, int lvl)
   }
 }
 
-void m19::postfix_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) { //DONE
   _inInitSection = true;
   node->block()->accept(this, lvl);
   _inInitSection = false; //to be sure
 }
 
-void m19::postfix_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) { //DONE
   _inFinalSection = true;
   node->block()->accept(this, lvl);
   _inFinalSection = false;
 }
 
-void m19::postfix_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   int end;
   if (node->condition()) 
@@ -541,7 +564,7 @@ void m19::postfix_writer::do_fun_section_node(m19::fun_section_node * const node
   _pf.LABEL(mklbl(end));
 }
 
-void m19::postfix_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) { //DONE
   //ASSERT_SAFE_EXPRESSIONS;  
   _finalSectionLbl = ++_lbl;
   _functionEndLbl = ++_lbl;
@@ -554,14 +577,14 @@ void m19::postfix_writer::do_fun_body_node(m19::fun_body_node * const node, int 
 }
 
 void m19::postfix_writer::do_return_val_node(m19::return_val_node * const node, int lvl) {
-  //FIXME
+  //APAGAR
 }
 
 void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int lvl) {
   //FIXME
 }
 
-void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
+void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
 
   std::string id = node->identifier();
@@ -653,7 +676,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
   }
 }
 
-void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   if (_inFunctionBody || _inFunctionArgs) {
     error(node->lineno(), "cannot declare function in body or in args");
@@ -667,7 +690,7 @@ void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int 
   reset_new_symbol();
 }
 
-void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
+void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   
   if (_inFunctionBody || _inFunctionArgs) {
@@ -720,8 +743,5 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
     for (std::string s : _functions_to_declare)
       _pf.EXTERN(s);
   }
-}
-
-void m19::postfix_writer::do_id_node(m19::id_node * const node, int lvl) {
-  //FIXME
+  _function = nullptr;
 }
