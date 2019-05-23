@@ -449,12 +449,10 @@ void m19::type_checker::do_read_node(m19::read_node * const node, int lvl) { //D
 //---------------------------------------------------------------------------
 
 void m19::type_checker::do_for_node(m19::for_node * const node, int lvl) { //DONE
-  _symtab.push();
   node->init()->accept(this, lvl + 2);
   node->condition()->accept(this, lvl + 2);
   node->after()->accept(this, lvl + 2);
   node->block()->accept(this, lvl + 2);
-  _symtab.pop();
 }
 
 //---------------------------------------------------------------------------
@@ -491,13 +489,8 @@ void m19::type_checker::do_index_node(m19::index_node * const node, int lvl) { /
 }
 
 void m19::type_checker::do_block_node(m19::block_node * const node, int lvl) { //DONE
-  bool inInitSection = _inInitSection;
-  _inInitSection = false;
-
-  if (!inInitSection) _symtab.push();
   node->declarations()->accept(this, lvl + 2);
   node->instructions()->accept(this, lvl + 2);
-  if (!inInitSection) _symtab.pop();
 }
 
 void m19::type_checker::do_return_node(m19::return_node * const node, int lvl) { //DONE
@@ -505,7 +498,6 @@ void m19::type_checker::do_return_node(m19::return_node * const node, int lvl) {
 }
 
 void m19::type_checker::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) { //DONE
-  _inInitSection = true;
   node->block()->accept(this, lvl);
 }
 
@@ -519,13 +511,9 @@ void m19::type_checker::do_fun_section_node(m19::fun_section_node * const node, 
 }
 
 void m19::type_checker::do_fun_body_node(m19::fun_body_node * const node, int lvl) { //DONE
-  _symtab.push();
-  
-  if (node->initial_node()) node->initial_node()->accept(this, lvl);
+  if (node->initial_section()) node->initial_section()->accept(this, lvl);
   if (node->sections())     node->sections()->accept(this, lvl);
-  if (node->final_node())   node->final_node()->accept(this, lvl);
-  
-  _symtab.pop();
+  if (node->final_section())   node->final_section()->accept(this, lvl);
 }
 
 void m19::type_checker::do_return_val_node(m19::return_val_node * const node, int lvl) {
@@ -549,7 +537,7 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
 }
 
 void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lvl) { //FIXME @
-  if (node->initializer() != nullptr) { 
+  if (node->initializer() != nullptr) {  //falta ver se ta inArgs
     node->initializer()->accept(this, lvl + 2);
 
     basic_type *vartype = node->varType();
@@ -638,7 +626,7 @@ void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lv
 
 }
 
-void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl) { //verificar argumentos?? e literal
+void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl) { //verificar argumentos?? e literal; verificar qualificadores
   std::string id;
 
   // "fix" naming issues...
@@ -669,9 +657,9 @@ void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl)
     _parent->set_new_symbol(function);
   }
 
-  _symtab.push();
+/*  _symtab.push();
   node->arguments()->accept(this, lvl + 2);
   node->body()->accept(this, lvl + 2);
-  _symtab.pop();
+  _symtab.pop();*/
 }
 

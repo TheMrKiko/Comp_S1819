@@ -307,9 +307,9 @@ void m19::xml_writer::do_fun_section_node(m19::fun_section_node * const node, in
 void m19::xml_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
   //ASSERT_SAFE_EXPRESSIONS;
   openTag(node, lvl);
-  if (node->initial_node()) {
+  if (node->initial_section()) {
     openTag("initial", lvl + 2);
-    node->initial_node()->accept(this, lvl + 4);
+    node->initial_section()->accept(this, lvl + 4);
     closeTag("initial", lvl + 2);
   }
 
@@ -319,9 +319,9 @@ void m19::xml_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl)
     closeTag("sections", lvl + 2);
   }
 
-  if (node->final_node()) {
+  if (node->final_section()) {
     openTag("final", lvl + 2);
-    node->final_node()->accept(this, lvl + 4);
+    node->final_section()->accept(this, lvl + 4);
     closeTag("final", lvl + 2);
   }
   closeTag(node, lvl);

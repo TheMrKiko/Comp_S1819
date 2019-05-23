@@ -36,11 +36,17 @@ void m19::postfix_writer::do_sequence_node(cdk::sequence_node * const node, int 
 }
 
 void m19::postfix_writer::do_continue_node(m19::continue_node * const node, int lvl) {
-  // FIXME
+  if (_forIni.size() != 0) {
+    _pf.JMP(mklbl(_forStep.top())); // jump to next cycle
+  } else
+    error(node->lineno(), "'continue' outside 'for'");
 }
 
 void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) {
-  // FIXME
+  if (_forIni.size() != 0) {
+    _pf.JMP(mklbl(_forEnd.top())); // jump to for end
+  } else
+    error(node->lineno(), "'break' outside 'for'");
 }
 
 /*void m19::postfix_writer::do_expressions_node(m19::expressions_node * const node, int lvl) {
@@ -321,7 +327,7 @@ void m19::postfix_writer::do_rvalue_node(cdk::rvalue_node * const node, int lvl)
   }
 }
 
-void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) {
+void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, int lvl) { //not done @ pelo menos
   ASSERT_SAFE_EXPRESSIONS;
   node->rvalue()->accept(this, lvl); // determine the new value
   _pf.DUP32();
@@ -488,30 +494,59 @@ void m19::postfix_writer::do_index_node(m19::index_node * const node, int lvl) {
 }
 
 void m19::postfix_writer::do_block_node(m19::block_node * const node, int lvl) { //DONE probably
-  _symtab.push(); // for block-local vars
+  bool inInitSection = _inInitSection;
+  _inInitSection = false;
+
+  if (!inInitSection) _symtab.push();
   if (node->declarations()) node->declarations()->accept(this, lvl + 2);
   if (node->instructions()) node->instructions()->accept(this, lvl + 2);
-  _symtab.pop();
+  if (!inInitSection) _symtab.pop();  
 }
 
 void m19::postfix_writer::do_return_node(m19::return_node * const node, int lvl) {
-  //FIXME
+  if (!_inFinalSection) {
+    _pf.JMP(mklbl(_finalSectionLbl));
+  } else {
+    _pf.JMP(mklbl(_functionEndLbl));
+  }
 }
 
 void m19::postfix_writer::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
-  //FIXME
+  _inInitSection = true;
+  node->block()->accept(this, lvl);
+  _inInitSection = false; //to be sure
 }
 
 void m19::postfix_writer::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
-  //FIXME
+  _inFinalSection = true;
+  node->block()->accept(this, lvl);
+  _inFinalSection = false;
 }
 
 void m19::postfix_writer::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  int end;
+  if (node->condition()) 
+    node->condition()->accept(this, lvl);
+  else 
+    _pf.INT(1);
+  _pf.JZ(mklbl(end = ++_lbl));
+  node->block()->accept(this, lvl + 2);
+  if (node->exclusive())
+    _pf.JMP(mklbl(_finalSectionLbl));
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(end));
 }
 
 void m19::postfix_writer::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
-  //FIXME
+  _finalSectionLbl = ++_lbl;
+  _functionEndLbl = ++_lbl;
+  if (node->initial_section()) node->initial_section()->accept(this, lvl);
+  if (node->sections()) node->sections()->accept(this, lvl);
+  _pf.ALIGN();
+  _pf.LABEL(mklbl(_finalSectionLbl));
+  if (node->final_section()) node->final_section()->accept(this, lvl);
+  _pf.LABEL(mklbl(_functionEndLbl));
 }
 
 void m19::postfix_writer::do_return_val_node(m19::return_val_node * const node, int lvl) {
@@ -523,15 +558,164 @@ void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int 
 }
 
 void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+
+  std::string id = node->identifier();
+  // type size?
+  int offset = 0, typesize = node->varType()->size();// in bytes
+  //std::cout << "ARG: " << id << ", " << typesize << std::endl;
+  if (_inFunctionBody) {
+    _offset -= typesize;
+    offset = _offset;
+  } else if (_inFunctionArgs) {
+    offset = _offset;
+    _offset += typesize;
+  } else {
+    offset = 0; // global variable
+  }
+
+  std::shared_ptr<m19::symbol> symbol = new_symbol();
+  if (symbol) {
+    symbol->set_offset(offset);
+    reset_new_symbol();
+  }
+
+  if (node->qualifier() == 2) {
+    _pf.EXTERN(id);
+  }
+
+  else if (_inFunctionBody) {
+    // if we are dealing with local variables, then no action is needed
+    // unless an initializer exists
+    if (node->initializer()) {
+      node->initializer()->accept(this, lvl);
+      if (node->varType()->name() == basic_type::TYPE_INT || node->varType()->name() == basic_type::TYPE_STRING
+          || node->varType()->name() == basic_type::TYPE_POINTER) {
+        _pf.LOCAL(symbol->offset());
+        _pf.STINT();
+      } else if (node->varType()->name() == basic_type::TYPE_DOUBLE) {
+        _pf.LOCAL(symbol->offset());
+        _pf.STDOUBLE();
+      } else {
+        std::cerr << "cannot initialize" << std::endl;
+      }
+    }
+  } 
+  
+  else {
+    if (true) { //APAGAR ISTO
+      if (node->initializer() == nullptr) {
+        _pf.BSS();
+        _pf.ALIGN();
+        if (node->qualifier() == 1) _pf.GLOBAL(id, _pf.OBJ());
+        _pf.LABEL(id);
+        _pf.SALLOC(typesize);
+      } else {
+
+        if (node->varType()->name() == basic_type::TYPE_INT || node->varType()->name() == basic_type::TYPE_DOUBLE
+            || node->varType()->name() == basic_type::TYPE_POINTER || node->varType()->name() == basic_type::TYPE_STRING) {
+
+          _pf.DATA();
+          _pf.ALIGN();
+          if (node->qualifier() == 1) _pf.GLOBAL(id, _pf.OBJ());          
+          _pf.LABEL(id);
+
+          if (node->varType()->name() == basic_type::TYPE_INT) {
+            node->initializer()->accept(this, lvl);
+          } else if (node->varType()->name() == basic_type::TYPE_POINTER) {
+            node->initializer()->accept(this, lvl);
+          } else if (node->varType()->name() == basic_type::TYPE_DOUBLE) {
+            if (node->initializer()->type()->name() == basic_type::TYPE_DOUBLE) {
+              node->initializer()->accept(this, lvl);
+            } else if (node->initializer()->type()->name() == basic_type::TYPE_INT) {
+              cdk::integer_node *dclini = dynamic_cast<cdk::integer_node *>(node->initializer());
+              cdk::double_node ddi(dclini->lineno(), dclini->value());
+              ddi.accept(this, lvl);
+            } else {
+              std::cerr << node->lineno() << ": '" << id << "' has bad initializer for real value\n";
+              _errors = true;
+            }
+          } else if (node->varType()->name() == basic_type::TYPE_STRING) {
+            node->initializer()->accept(this, lvl);
+          }
+        } else {
+          std::cerr << node->lineno() << ": '" << id << "' has unexpected initializer\n";
+          _errors = true;
+        }
+
+      }
+
+    }
+  }
 }
 
 void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  if (_inFunctionBody || _inFunctionArgs) {
+    error(node->lineno(), "cannot declare function in body or in args");
+    return;
+  }
+
+  if (!new_symbol()) return;
+
+  std::shared_ptr<m19::symbol> function = new_symbol();
+  _functions_to_declare.insert(function->name());
+  reset_new_symbol();
 }
 
 void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS ;
+  
+  if (_inFunctionBody || _inFunctionArgs) {
+    error(node->lineno(), "cannot define function in body or in arguments");
+    return;
+  }
+
+  // remember symbol so that args and body know
+  std::shared_ptr<m19::symbol> function = new_symbol();
+  _functions_to_declare.erase(function->name());  // just in case
+  reset_new_symbol();
+
+  _offset = 8; // prepare for arguments (4: remember to account for return address)
+  _symtab.push(); // scope of args
+  if (node->arguments()) {
+    _inFunctionArgs = true; //FIXME really needed?
+    for (size_t ix = 0; ix < node->arguments()->size(); ix++) {
+      cdk::basic_node *arg = node->arguments()->node(ix);
+      if (arg == nullptr) break; // this means an empty sequence of arguments
+      arg->accept(this, 0); // the function symbol is at the top of the stack
+    }
+    _inFunctionArgs = false; //FIXME really needed?
+  }
+
+  _pf.TEXT();
+  _pf.ALIGN();
+  if (node->qualifier() == 1) _pf.GLOBAL(function->name(), _pf.FUNC());
+  _pf.LABEL(function->name());
+
+  // compute stack size to be reserved for local variables
+  frame_size_calculator lsc(_compiler, _symtab);
+  node->accept(&lsc, lvl);
+  _pf.ENTER(lsc.localsize()); // total stack size reserved for local variables
+
+  // the following flag is a slight hack: it won't work with nested functions
+  _inFunctionBody = true;
+  // prepare for local variables but remember the return value (first below fp)
+  _offset = -function->type()->size();
+  os() << "        ;; before body " << std::endl;
+  node->body()->accept(this, lvl + 2); // block has its own scope
+  os() << "        ;; after body " << std::endl;
+  _inFunctionBody = false;
+  _symtab.pop(); // scope of arguments
+
+  _pf.LEAVE();
+  _pf.RET();
+
+  if (node->identifier() == "m19") {
+    // declare external functions
+    for (std::string s : _functions_to_declare)
+      _pf.EXTERN(s);
+  }
 }
 
 void m19::postfix_writer::do_id_node(m19::id_node * const node, int lvl) {
