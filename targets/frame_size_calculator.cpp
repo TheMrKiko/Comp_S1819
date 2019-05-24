@@ -109,25 +109,27 @@ void m19::frame_size_calculator::do_break_node(m19::break_node * const node, int
 void m19::frame_size_calculator::do_id_node(m19::id_node * const node, int lvl) {
   // EMPTY
 }
-void m19::frame_size_calculator::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
-  // EMPTY
-}
-void m19::frame_size_calculator::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
-  // EMPTY
-}
-void m19::frame_size_calculator::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
-  // EMPTY
-}
 void m19::frame_size_calculator::do_evaluation_node(m19::evaluation_node * const node, int lvl) {
   // EMPTY
 }
 void m19::frame_size_calculator::do_return_val_node(m19::return_val_node * const node, int lvl) {
   // EMPTY
 }
-void m19::frame_size_calculator::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
-  // EMPTY
-}
 
+void m19::frame_size_calculator::do_fun_body_node(m19::fun_body_node * const node, int lvl) {
+  if (node->initial_section()) node->initial_section()->accept(this, lvl);
+  if (node->sections()) node->sections()->accept(this, lvl);
+  if (node->final_section()) node->final_section()->accept(this, lvl);
+}
+void m19::frame_size_calculator::do_fun_init_section_node(m19::fun_init_section_node * const node, int lvl) {
+  if (node->block()) node->block()->accept(this, lvl);
+}
+void m19::frame_size_calculator::do_fun_section_node(m19::fun_section_node * const node, int lvl) {
+  if (node->block()) node->block()->accept(this, lvl);
+}
+void m19::frame_size_calculator::do_fun_final_section_node(m19::fun_final_section_node * const node, int lvl) {
+  if (node->block()) node->block()->accept(this, lvl);
+}
 void m19::frame_size_calculator::do_sequence_node(cdk::sequence_node * const node, int lvl) {
   for (size_t i = 0; i < node->size(); i++) {
     cdk::basic_node *n = node->node(i);
@@ -142,6 +144,7 @@ void m19::frame_size_calculator::do_block_node(m19::block_node * const node, int
 }
 
 void m19::frame_size_calculator::do_for_node(m19::for_node * const node, int lvl) {
+  if (node->init()) node->init()->accept(this, lvl + 2);
   node->block()->accept(this, lvl + 2);
 }
 
