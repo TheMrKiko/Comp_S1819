@@ -21,7 +21,7 @@ namespace m19 {
     std::set<std::string> _functions_to_declare;
 
     // semantic analysis
-    bool _errors, /*_inFunction, _inFunctionName, */_inFunctionArgs = false, _inFunctionBody = false, _inInitSection = false, _inFinalSection = false;
+    bool _errors, /*_inFunction, _inFunctionName, */_inFunArgs = false, _inFunctionBody = false, _inInitSection = false, _inFinalSection = false;
     bool _inForInit;
     //bool _returnSeen; // when building a function
     std::stack<int> _forIni, _forStep, _forEnd; // for break/continue

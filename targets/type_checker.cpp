@@ -69,7 +69,7 @@ void m19::type_checker::do_integer_node(cdk::integer_node * const node, int lvl)
 
 void m19::type_checker::do_double_node(cdk::double_node * const node, int lvl) { //DONE
   ASSERT_UNSPEC;
-  node->type(new basic_type(4, basic_type::TYPE_DOUBLE));
+  node->type(new basic_type(8, basic_type::TYPE_DOUBLE));
 }
 
 void m19::type_checker::do_string_node(cdk::string_node * const node, int lvl) { //DONE
@@ -541,6 +541,7 @@ void m19::type_checker::do_return_val_node(m19::return_val_node * const node, in
 }
 
 void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lvl) { //verificar argumentos??
+  ASSERT_UNSPEC;
   const std::string &id = node->identifier();
   std::shared_ptr<m19::symbol> symbol = _symtab.find(id);
 
@@ -556,9 +557,10 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
   node->type(symbol->type());
 
   if (node->arguments()) {
-    if (node->arguments()->size() != _function->args()->size())
+    if (node->arguments()->size() != symbol->args()->size()) {
+      std::cerr << id << node->arguments()->size() << symbol->args()->size() << std::endl;
       throw std::string("bad arguments");
-
+    }
     for (size_t ix = 0; ix < node->arguments()->size(); ix++) {
 
       cdk::typed_node *valarg = dynamic_cast<cdk::typed_node*>(node->arguments()->node(ix));
@@ -652,8 +654,10 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
     throw std::string("variable '" + id + "' redeclared");
   }
 
-  if (_inFunArgs)
+  if (_inFunArgs) {
     _function->args()->insert(_function->args()->end(), symbol);
+    std::cerr << id << _function->args()->size() << std::endl;
+  }
 }
 
 void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //verificar argumentos?? e lit
@@ -733,7 +737,12 @@ void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl)
       if (lit == nullptr) throw std::string("wrong type for literal");
     } else if (node->type()->name() == basic_type::TYPE_DOUBLE) {
       cdk::double_node *lit = dynamic_cast<cdk::double_node*>(node->literal());
-      if (lit == nullptr) throw std::string("wrong type for literal");
+      if (lit == nullptr) {
+        cdk::integer_node *lit2 = dynamic_cast<cdk::integer_node*>(node->literal());
+        if (lit2 == nullptr) {
+          throw std::string("wrong type for literal");
+        }
+      }
     } else if (node->type()->name() == basic_type::TYPE_POINTER) {
       cdk::integer_node *lit = dynamic_cast<cdk::integer_node*>(node->literal());
       if (lit == nullptr) throw std::string("wrong type for literal");
@@ -745,7 +754,19 @@ void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl)
       throw std::string("void type function with initial value");
     }
   }
-  //_function = function;
+  /*_function = function;
+
+  _inFunArgs = true;
+
+  if (node->arguments()) {
+    _symtab.push();
+    node->arguments()->accept(this, lvl + 2);
+    _symtab.pop();
+  }
+
+  _inFunArgs = false;
+
+  _function = nullptr;*/
   //_inFunArgs = true;
 
   //_symtab.push();
@@ -754,6 +775,5 @@ void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl)
   //_symtab.pop();
 
   //_inFunArgs = false;
-  //_function = nullptr;
 }
 

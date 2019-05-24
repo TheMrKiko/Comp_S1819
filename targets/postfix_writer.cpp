@@ -52,6 +52,7 @@ void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
   if (_function) {
     _pf.INT(node->value()); // integer literal is on the stack: push an integer
   } else {
@@ -60,6 +61,7 @@ void m19::postfix_writer::do_integer_node(cdk::integer_node * const node, int lv
 }
 
 void m19::postfix_writer::do_double_node(cdk::double_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
   if (_function) {
     _pf.DOUBLE(node->value()); // load number to the stack
   } else {
@@ -68,6 +70,7 @@ void m19::postfix_writer::do_double_node(cdk::double_node * const node, int lvl)
 }
 
 void m19::postfix_writer::do_string_node(cdk::string_node * const node, int lvl) { //DONE
+  ASSERT_SAFE_EXPRESSIONS;
   int lbl1;
 
   /* generate the string literal */
@@ -562,7 +565,7 @@ void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int 
     for (int ax = node->arguments()->size(); ax > 0; ax--) {
 
       cdk::expression_node *arg = dynamic_cast<cdk::expression_node*>(node->arguments()->node(ax - 1));
-      std::shared_ptr<m19::symbol> funArg = symbol->args()->at(ax);
+      std::shared_ptr<m19::symbol> funArg = symbol->args()->at(ax - 1);
       argsSize += funArg->type()->size();
 
       arg->accept(this, lvl + 2);
@@ -597,7 +600,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
   if (_inFunctionBody) {
     _offset -= typesize;
     offset = _offset;
-  } else if (_inFunctionArgs) {
+  } else if (_inFunArgs) {
     offset = _offset;
     _offset += typesize;
   } else {
@@ -681,7 +684,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
 
 void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
-  if (_inFunctionBody || _inFunctionArgs) {
+  if (_inFunctionBody || _inFunArgs) {
     error(node->lineno(), "cannot declare function in body or in args");
     return;
   }
@@ -696,7 +699,7 @@ void m19::postfix_writer::do_fun_decl_node(m19::fun_decl_node * const node, int 
 void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lvl) { //DONE
   ASSERT_SAFE_EXPRESSIONS;
   
-  if (_inFunctionBody || _inFunctionArgs) {
+  if (_inFunctionBody || _inFunArgs) {
     error(node->lineno(), "cannot define function in body or in arguments");
     return;
   }
@@ -709,13 +712,13 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   _offset = 8; // prepare for arguments (4: remember to account for return address)
   _symtab.push(); // scope of args
   if (node->arguments()) {
-    _inFunctionArgs = true; //FIXME really needed?
+    _inFunArgs = true; //FIXME really needed?
     for (size_t ix = 0; ix < node->arguments()->size(); ix++) {
       cdk::basic_node *arg = node->arguments()->node(ix);
       if (arg == nullptr) break; // this means an empty sequence of arguments
       arg->accept(this, 0); // the function symbol is at the top of the stack
     }
-    _inFunctionArgs = false; //FIXME really needed?
+    _inFunArgs = false; //FIXME really needed?
   }
 
   _pf.TEXT();
