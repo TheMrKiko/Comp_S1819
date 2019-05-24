@@ -52,7 +52,7 @@ void m19::postfix_writer::do_break_node(m19::break_node * const node, int lvl) {
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_integer_node(cdk::integer_node * const node, int lvl) { //DONE
-  if (_inFunctionBody) {
+  if (_function) {
     _pf.INT(node->value()); // integer literal is on the stack: push an integer
   } else {
     _pf.SINT(node->value()); // integer literal is on the DATA segment
@@ -60,7 +60,7 @@ void m19::postfix_writer::do_integer_node(cdk::integer_node * const node, int lv
 }
 
 void m19::postfix_writer::do_double_node(cdk::double_node * const node, int lvl) { //DONE
-  if (_inFunctionBody) {
+  if (_function) {
     _pf.DOUBLE(node->value()); // load number to the stack
   } else {
     _pf.SDOUBLE(node->value()); // double is on the DATA segment
@@ -310,7 +310,7 @@ void m19::postfix_writer::do_variable_node(cdk::variable_node * const node, int 
   const std::string &id = node->name();
   std::shared_ptr<m19::symbol> symbol = _symtab.find(id);
   if (id == "@") {
-    _pf.LOCAL(-4);
+    _pf.LOCAL(-_function->type()->size());
   }
   else if (symbol->global()) {
     _pf.ADDR(symbol->name());
@@ -552,7 +552,33 @@ void m19::postfix_writer::do_return_val_node(m19::return_val_node * const node, 
 }
 
 void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int lvl) {
-  //FIXME
+  ASSERT_SAFE_EXPRESSIONS;
+  size_t argsSize = 0;
+  if (node->arguments()) {
+    for (int ax = node->arguments()->size(); ax > 0; ax--) {
+      cdk::expression_node *arg = dynamic_cast<cdk::expression_node*>(node->arguments()->node(ax - 1));
+      arg->accept(this, lvl + 2);
+      argsSize += arg->type()->size();
+    }
+  }
+
+  std::shared_ptr<m19::symbol> symbol = _symtab.find(node->identifier());
+
+  if (symbol == nullptr && node->identifier() == "@")
+      symbol = _function;
+
+  _pf.CALL(symbol->name());
+  if (argsSize != 0) {
+    _pf.TRASH(argsSize);
+  }
+
+  basic_type *type = symbol->type();
+  if (type->name() == basic_type::TYPE_INT || type->name() == basic_type::TYPE_POINTER || type->name() == basic_type::TYPE_STRING) {
+    _pf.LDFVAL32();
+  }
+  else if (type->name() == basic_type::TYPE_DOUBLE) {
+    _pf.LDFVAL64();
+  }
 }
 
 void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int lvl) { //DONE
@@ -696,6 +722,22 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   node->accept(&lsc, lvl);
   _pf.ENTER(lsc.localsize()); // total stack size reserved for local variables
 
+  
+  if (node->literal()) {
+    node->literal()->accept(this, lvl);
+    if (node->type()->name() == basic_type::TYPE_DOUBLE
+     && node->literal()->type()->name() == basic_type::TYPE_INT)
+        _pf.I2D();
+        
+
+    _pf.LOCAL(-_function->type()->size());
+    if (node->type()->name() == basic_type::TYPE_DOUBLE) {
+      _pf.STDOUBLE();
+    } else {
+      _pf.STINT();
+    }
+  }
+
   // the following flag is a slight hack: it won't work with nested functions
   _inFunctionBody = true;
   // prepare for local variables but remember the return value (first below fp)
@@ -706,7 +748,7 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   _inFunctionBody = false;
   _symtab.pop(); // scope of arguments
 
-  _pf.LOCAL(-4);
+  _pf.LOCAL(-_function->type()->size());
   if (_function->type()->name() == basic_type::TYPE_DOUBLE) {
     _pf.LDDOUBLE();
     _pf.STFVAL64();
@@ -720,6 +762,7 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
 
   _pf.EXTERN("readi");
   _pf.EXTERN("printi");
+  _pf.EXTERN("printd");
   _pf.EXTERN("prints");
   _pf.EXTERN("println");
 
@@ -732,10 +775,7 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
 }
 /*
 
-  // these are just a few library function imports
-  _pf.EXTERN("readi");
-  _pf.EXTERN("printi");
-  _pf.EXTERN("prints");
-  _pf.EXTERN("println");
-}
+    _pf.INT(1);
+    _pf.CALL("printi");
+    _pf.TRASH(4);
 */

@@ -527,7 +527,7 @@ void m19::type_checker::do_fun_final_section_node(m19::fun_final_section_node * 
 
 void m19::type_checker::do_fun_section_node(m19::fun_section_node * const node, int lvl) { //DONE
   if(node->condition()) node->condition()->accept(this, lvl);
-  node->block()->accept(this, lvl);  
+  //node->block()->accept(this, lvl);  
 }
 
 void m19::type_checker::do_fun_body_node(m19::fun_body_node * const node, int lvl) { //DONE
@@ -545,7 +545,7 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
   std::shared_ptr<m19::symbol> symbol = _symtab.find(id);
 
   if (symbol == nullptr) {
-    if (id == "@")
+    if (id == "@" && _function)
       symbol = _function;
     else
       throw std::string("symbol '" + id + "' is undeclared.");
@@ -615,7 +615,7 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
     _function->args()->push_back(symbol);
 }
 
-void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //verificar argumentos??
+void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //verificar argumentos?? e lit
   std::string id;
 
   // "fix" naming issues...
@@ -675,7 +675,7 @@ void m19::type_checker::do_fun_def_node(m19::fun_def_node * const node, int lvl)
   if (previous) {
     if (previous->forward() 
         && (previous->qualifier() == node->qualifier())
-        && (previous->type() == node->type())) {
+        && (previous->type()->name() == node->type()->name())) {
       _symtab.replace(function->name(), function);
       _parent->set_new_symbol(function);
     } else {
