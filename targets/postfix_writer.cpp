@@ -105,7 +105,7 @@ void m19::postfix_writer::do_ref_node(m19::ref_node * const node, int lvl) { //D
   node->lvalue()->accept(this, lvl); // it's enough!
 }
 
-void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) {
+void m19::postfix_writer::do_alloc_node(m19::alloc_node * const node, int lvl) { //DONE careful with local offset??
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl);
   _pf.INT(node->type()->subtype()->size());
@@ -352,35 +352,6 @@ void m19::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 }
 
 //---------------------------------------------------------------------------
-/*
-void m19::postfix_writer::do_program_node(m19::program_node * const node, int lvl) {
-  // Note that Simple doesn't have functions. Thus, it doesn't need
-  // a function node. However, it must start in the main function.
-  // The ProgramNode (representing the whole program) doubles as a
-  // main function node.
-
-  // generate the main function (RTS mandates that its name be "_main")
-  _pf.TEXT();
-  _pf.ALIGN();
-  _pf.GLOBAL("_main", _pf.FUNC());
-  _pf.LABEL("_main");
-  _pf.ENTER(0);  // Simple doesn't implement local variables
-
-  node->statements()->accept(this, lvl);
-
-  // end the main function
-  _pf.INT(0);
-  _pf.STFVAL32();
-  _pf.LEAVE();
-  _pf.RET();
-
-  // these are just a few library function imports
-  _pf.EXTERN("readi");
-  _pf.EXTERN("printi");
-  _pf.EXTERN("prints");
-  _pf.EXTERN("println");
-}
-*/
 //---------------------------------------------------------------------------
 
 void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, int lvl) {  //DONE
@@ -392,7 +363,7 @@ void m19::postfix_writer::do_evaluation_node(m19::evaluation_node * const node, 
           || node->argument()->type()->name() == basic_type::TYPE_POINTER
           || node->argument()->type()->name() == basic_type::TYPE_STRING) {
     _pf.TRASH(4);
-  } else {
+  } else if (node->argument()->type()->name() != basic_type::TYPE_VOID) {
     std::cerr << "ERROR: CANNOT HAPPEN!" << std::endl;
     exit(1);
   }
@@ -450,7 +421,7 @@ void m19::postfix_writer::do_for_node(m19::for_node * const node, int lvl) { //D
   _inForInit = true;// remember this for local declarations
 
   // initialize
-  node->init()->accept(this, lvl + 2);
+  if (node->init()) node->init()->accept(this, lvl + 2);
 
   os() << "        ;; FOR test" << std::endl;
   // prepare to test
@@ -630,7 +601,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
   } 
   
   else {
-    if (_function) { //necessario?
+    if (!_function) { //necessario?
       if (node->initializer() == nullptr) {
         _pf.BSS();
         _pf.ALIGN();
@@ -735,8 +706,22 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   _inFunctionBody = false;
   _symtab.pop(); // scope of arguments
 
+  _pf.LOCAL(-4);
+  if (_function->type()->name() == basic_type::TYPE_DOUBLE) {
+    _pf.LDDOUBLE();
+    _pf.STFVAL64();
+  } else if (_function->type()->name() != basic_type::TYPE_VOID) {
+    _pf.LDINT();
+    _pf.STFVAL32();
+  }
+
   _pf.LEAVE();
   _pf.RET();
+
+  _pf.EXTERN("readi");
+  _pf.EXTERN("printi");
+  _pf.EXTERN("prints");
+  _pf.EXTERN("println");
 
   if (node->identifier() == "m19") {
     // declare external functions
@@ -745,3 +730,12 @@ void m19::postfix_writer::do_fun_def_node(m19::fun_def_node * const node, int lv
   }
   _function = nullptr;
 }
+/*
+
+  // these are just a few library function imports
+  _pf.EXTERN("readi");
+  _pf.EXTERN("printi");
+  _pf.EXTERN("prints");
+  _pf.EXTERN("println");
+}
+*/

@@ -469,10 +469,10 @@ void m19::type_checker::do_read_node(m19::read_node * const node, int lvl) { //D
 //---------------------------------------------------------------------------
 
 void m19::type_checker::do_for_node(m19::for_node * const node, int lvl) { //DONE
-  node->init()->accept(this, lvl + 2);
+  /*node->init()->accept(this, lvl + 2);
   node->condition()->accept(this, lvl + 2);
   node->after()->accept(this, lvl + 2);
-  node->block()->accept(this, lvl + 2);
+  node->block()->accept(this, lvl + 2);*/
 }
 
 //---------------------------------------------------------------------------
