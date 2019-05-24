@@ -380,7 +380,7 @@ void m19::postfix_writer::do_print_node(m19::print_node * const node, int lvl) {
     _pf.TRASH(4); // delete the printed value
   } else if (node->argument()->type()->name() == basic_type::TYPE_DOUBLE) {
     _pf.CALL("printd");
-    _pf.TRASH(4); // delete the printed value's address
+    _pf.TRASH(8); // delete the printed value's address
   } else if (node->argument()->type()->name() == basic_type::TYPE_STRING) {
     _pf.CALL("prints");
     _pf.TRASH(4); // delete the printed value's address
