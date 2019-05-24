@@ -554,18 +554,24 @@ void m19::postfix_writer::do_return_val_node(m19::return_val_node * const node, 
 void m19::postfix_writer::do_fun_call_node(m19::fun_call_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   size_t argsSize = 0;
-  if (node->arguments()) {
-    for (int ax = node->arguments()->size(); ax > 0; ax--) {
-      cdk::expression_node *arg = dynamic_cast<cdk::expression_node*>(node->arguments()->node(ax - 1));
-      arg->accept(this, lvl + 2);
-      argsSize += arg->type()->size();
-    }
-  }
-
   std::shared_ptr<m19::symbol> symbol = _symtab.find(node->identifier());
-
   if (symbol == nullptr && node->identifier() == "@")
       symbol = _function;
+
+  if (node->arguments()) {
+    for (int ax = node->arguments()->size(); ax > 0; ax--) {
+
+      cdk::expression_node *arg = dynamic_cast<cdk::expression_node*>(node->arguments()->node(ax - 1));
+      std::shared_ptr<m19::symbol> funArg = symbol->args()->at(ax);
+      argsSize += funArg->type()->size();
+
+      arg->accept(this, lvl + 2);
+
+      if (funArg->type()->name() == basic_type::TYPE_DOUBLE
+        && arg->type()->name() == basic_type::TYPE_INT)
+        _pf.I2D();
+    }
+  }
 
   _pf.CALL(symbol->name());
   if (argsSize != 0) {
@@ -624,7 +630,7 @@ void m19::postfix_writer::do_var_decl_node(m19::var_decl_node * const node, int 
         std::cerr << "cannot initialize" << std::endl;
       }
     }
-  } 
+  }
   
   else {
     if (!_function) { //necessario?

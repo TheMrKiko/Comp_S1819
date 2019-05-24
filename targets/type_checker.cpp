@@ -555,9 +555,50 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
 
   node->type(symbol->type());
 
-  //DAVID: FIXME: should also validate args against symbol
   if (node->arguments()) {
-    node->arguments()->accept(this, lvl + 4);
+    if (node->arguments()->size() != _function->args()->size())
+      throw std::string("bad arguments");
+
+    for (size_t ix = 0; ix < node->arguments()->size(); ix++) {
+
+      cdk::typed_node *valarg = dynamic_cast<cdk::typed_node*>(node->arguments()->node(ix));
+      std::shared_ptr<m19::symbol> funarg = symbol->args()->at(ix);
+
+      valarg->accept(this, lvl); // the function symbol is at the top of the stack
+
+      basic_type *vartype = funarg->type();
+      basic_type *initype = valarg->type(); 
+
+      cdk::integer_node *lit;
+
+      while (vartype->subtype() != nullptr && initype->subtype() != nullptr) {
+        vartype = vartype->subtype();
+        initype = initype->subtype();
+      }
+
+      if (vartype->name() == basic_type::TYPE_INT) {
+        if (initype->name() != basic_type::TYPE_INT) throw std::string(
+            "wrong type for initializer (integer expected).");
+      } else if (vartype->name() == basic_type::TYPE_DOUBLE) {
+        if (initype->name() != basic_type::TYPE_INT
+            && initype->name() != basic_type::TYPE_DOUBLE) throw std::string(
+            "wrong type for initializer (integer or double expected).");
+      } else if (vartype->name() == basic_type::TYPE_STRING) {
+        if (initype->name() != basic_type::TYPE_STRING) throw std::string(
+            "wrong type for initializer (string expected).");
+      } else if (vartype->name() == basic_type::TYPE_POINTER) {
+        if (initype->name() == basic_type::TYPE_INT) {
+          lit = dynamic_cast<cdk::integer_node*>(valarg);
+          if (lit == nullptr || lit->value() != 0) {
+            throw std::string("wrong type for initializer (pointer expected).");        
+          }
+        } else if (initype->name() != basic_type::TYPE_POINTER) throw std::string(
+            "wrong type for initializer (pointer expected).");
+      } else {
+        throw std::string("unknown type for initializer.");
+      }
+      
+    }
   }
 }
 
@@ -612,7 +653,7 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
   }
 
   if (_inFunArgs)
-    _function->args()->push_back(symbol);
+    _function->args()->insert(_function->args()->end(), symbol);
 }
 
 void m19::type_checker::do_fun_decl_node(m19::fun_decl_node * const node, int lvl) { //verificar argumentos?? e lit

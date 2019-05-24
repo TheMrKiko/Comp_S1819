@@ -1,8 +1,9 @@
-// $Id: type_checker.h,v 1.5 2019/05/23 21:09:30 ist186400 Exp $ -*- c++ -*-
+// $Id: type_checker.h,v 1.6 2019/05/24 13:19:57 ist186416 Exp $ -*- c++ -*-
 #ifndef __M19_SEMANTICS_TYPE_CHECKER_H__
 #define __M19_SEMANTICS_TYPE_CHECKER_H__
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <cdk/symbol_table.h>
 #include <cdk/ast/basic_node.h>
