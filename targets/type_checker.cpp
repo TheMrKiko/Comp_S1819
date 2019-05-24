@@ -140,9 +140,11 @@ void m19::type_checker::do_add_node(cdk::add_node * const node, int lvl) { //DON
 
   } else if (node->left()->type()->name() == basic_type::TYPE_INT && node->right()->type()->name() == basic_type::TYPE_POINTER) {
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->type()->_subtype = new basic_type(node->right()->type()->subtype()->size(), node->right()->type()->subtype()->name());
 
   } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) {
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->type()->_subtype = new basic_type(node->left()->type()->subtype()->size(), node->left()->type()->subtype()->name());
 
   } else if (node->left()->type()->name() == basic_type::TYPE_UNSPEC && node->right()->type()->name() == basic_type::TYPE_INT) {
     node->type(new basic_type(4, basic_type::TYPE_INT));
@@ -198,6 +200,7 @@ void m19::type_checker::do_sub_node(cdk::sub_node * const node, int lvl) { //DON
 
   } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_INT) {
     node->type(new basic_type(4, basic_type::TYPE_POINTER));
+    node->type()->_subtype = new basic_type(node->left()->type()->subtype()->size(), node->left()->type()->subtype()->name());
 
   } else if (node->left()->type()->name() == basic_type::TYPE_POINTER && node->right()->type()->name() == basic_type::TYPE_POINTER &&
     node->left()->type()->subtype()->name() == node->right()->type()->subtype()->name()) {
@@ -410,7 +413,7 @@ void m19::type_checker::do_assignment_node(cdk::assignment_node * const node, in
       ltype = ltype->subtype();
       rtype = rtype->subtype();
     }
-    if (ltype->name() != rtype->name()) {
+    if (ltype->name() != rtype->name() && rtype->name() != basic_type::TYPE_VOID) {
       throw std::string("wrong types in assignment");
     }
 
@@ -558,7 +561,6 @@ void m19::type_checker::do_fun_call_node(m19::fun_call_node * const node, int lv
 
   if (node->arguments()) {
     if (node->arguments()->size() != symbol->args()->size()) {
-      std::cerr << id << node->arguments()->size() << symbol->args()->size() << std::endl;
       throw std::string("bad arguments");
     }
     for (size_t ix = 0; ix < node->arguments()->size(); ix++) {
@@ -619,12 +621,21 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
     }
 
     if (vartype->name() == basic_type::TYPE_INT) {
-      if (initype->name() != basic_type::TYPE_INT) throw std::string(
-          "wrong type for initializer (integer expected).");
+      if (initype->name() != basic_type::TYPE_INT) {
+          if (initype->name() == basic_type::TYPE_VOID) {
+            initype->_name = basic_type::TYPE_INT;
+            initype->_size = 4;
+          } else throw std::string("wrong type for initializer (integer expected).");
+      }
     } else if (vartype->name() == basic_type::TYPE_DOUBLE) {
       if (initype->name() != basic_type::TYPE_INT
-          && initype->name() != basic_type::TYPE_DOUBLE) throw std::string(
+          && initype->name() != basic_type::TYPE_DOUBLE) {
+          if (initype->name() == basic_type::TYPE_VOID) {
+            initype->_name = basic_type::TYPE_DOUBLE;
+            initype->_size = 8;
+          } else throw std::string(
           "wrong type for initializer (integer or double expected).");
+        }
     } else if (vartype->name() == basic_type::TYPE_STRING) {
       if (initype->name() != basic_type::TYPE_STRING) throw std::string(
           "wrong type for initializer (string expected).");
@@ -656,7 +667,6 @@ void m19::type_checker::do_var_decl_node(m19::var_decl_node * const node, int lv
 
   if (_inFunArgs) {
     _function->args()->insert(_function->args()->end(), symbol);
-    std::cerr << id << _function->args()->size() << std::endl;
   }
 }
 
